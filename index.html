@@ -254,7 +254,7 @@ function login(){
     })
   }else{
     if(!e||!p)return showToast('Informe e-mail e senha.',true);
-    if(e==='admin@local'&&p==='1234'){
+    if(e==='admin@local'&&p==='Lara@2310'){
       currentUser={id:'local-admin',name:'Administrador',email:e,role:'Administrador'};
       enterApp();
     }else showToast('E-mail ou senha incorretos.',true);
