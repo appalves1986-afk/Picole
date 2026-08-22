@@ -76,7 +76,7 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}a{text-decoratio
   <main class="main">
     <header class="topbar">
       <div style="display:flex;gap:10px;align-items:center"><button class="icon-btn mobile-menu" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button><h2 id="pageTitle">Dashboard</h2></div>
-      <div class="top-actions"><span class="muted" id="clock"></span><button class="icon-btn" onclick="toggleTheme()" title="Tema"><i class="fa-solid fa-moon"></i></button><button class="icon-btn" onclick="showToast('Sistema sincronizado localmente.')" title="Status"><i class="fa-solid fa-cloud"></i></button></div>
+      <div class="top-actions"><span class="muted" id="clock"></span><button class="icon-btn" onclick="toggleTheme()" title="Tema"><i class="fa-solid fa-moon"></i></button><button class="icon-btn" onclick="fetchFromSupabase()" title="Sincronizar Nuvem"><i class="fa-solid fa-rotate"></i></button></div>
     </header>
 
     <section class="content">
@@ -103,7 +103,7 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}a{text-decoratio
           <div class="card"><div class="card-head"><h3>Nova venda</h3><div class="toolbar"><input id="saleSearch" class="input" placeholder="Buscar produto..." oninput="renderProducts()"></div></div><div id="products" class="products"></div></div>
           <div class="card"><div class="card-head"><h3>Carrinho</h3><span id="cartCount" class="badge b-info">0 itens</span></div><div id="cart" class="cart-list"></div><div class="totals"><div class="total-line"><span>Subtotal</span><b id="subtotal">R$ 0,00</b></div><div class="field"><label>DESCONTO (R$)</label><input id="discount" class="input" type="number" min="0" step=".01" value="0" oninput="renderCart()"></div><div class="total-line" style="margin-top:12px"><span>Total</span><b class="total-final" id="saleTotal">R$ 0,00</b></div><button class="btn btn-success btn-block" style="margin-top:12px" onclick="openPayment()"><i class="fa-solid fa-check"></i> Finalizar venda</button></div></div>
         </div>
-        <div class="card" style="margin-top:18px"><div class="card-head"><h3>Histórico de vendas</h3><div class="toolbar"><input id="historySearch" class="input" placeholder="Buscar por número ou pagamento..." oninput="renderSalesHistory()"></div></div><div class="table-wrap"><table><thead><tr><th>Nº</th><th>Data</th><th>Itens</th><th>Pagamento</th><th>Total</th><th>Status</th><th></th></tr></thead><tbody id="salesHistory"></tbody></table></div></div>
+        <div class="card" style="margin-top:18px"><div class="card-head"><h3>Histórico de vendas</h3><div class="toolbar"><input id="historySearch" class="input" placeholder="Buscar por número ou pagamento..." oninput="renderSalesHistory()"></div></div><div class="table-wrap"><table><thead><tr><th>Nº</th><th>Data</th><th>Itens</th><th>Pagamento</th><th>Total</th><th>Status</th><th>Ações</th></tr></thead><tbody id="salesHistory"></tbody></table></div></div>
       </div>
 
       <div class="page" id="page-estoque">
@@ -141,7 +141,7 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}a{text-decoratio
       </div>
 
       <div class="page" id="page-usuarios">
-        <div class="card"><div class="card-head"><h3>Usuários e permissões</h3><button class="btn btn-primary" onclick="openUserModal()"><i class="fa-solid fa-user-plus"></i> Novo usuário</button></div><div class="alert info">Com Supabase configurado, você pode gerenciar autenticação real na nuvem.</div><div class="table-wrap"><table><thead><tr><th>Nome</th><th>E-mail</th><th>Perfil</th><th>Status</th><th></th></tr></thead><tbody id="usersTable"></tbody></table></div></div>
+        <div class="card"><div class="card-head"><h3>Usuários e permissões</h3><button class="btn btn-primary" onclick="openUserModal()"><i class="fa-solid fa-user-plus"></i> Novo usuário</button></div><div class="alert info">Gerencie a autenticação e perfis dos operadores.</div><div class="table-wrap"><table><thead><tr><th>Nome</th><th>E-mail</th><th>Perfil</th><th>Status</th><th></th></tr></thead><tbody id="usersTable"></tbody></table></div></div>
       </div>
 
       <div class="page" id="page-config">
@@ -160,10 +160,10 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}a{text-decoratio
 
 <script>
 /* ============================================================
-   PICOLÉS PRO V2 - SUPABASE CONECTADO
+    PICOLÉS PRO V2 - SUPABASE FULL CONECTADO & SINCRONIZADO
 ============================================================ */
-const SUPABASE_URL = 'https://iaamdwnjhrzynmxjtshe.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_TdPMJXO02koPQ75j2fCs9A_kGcIQOaj';
+let SUPABASE_URL = localStorage.getItem('sb_url') || 'https://iaamdwnjhrzynmxjtshe.supabase.co';
+let SUPABASE_KEY = localStorage.getItem('sb_key') || 'sb_publishable_TdPMJXO02koPQ75j2fCs9A_kGcIQOaj';
 
 const LS='picoles_pro_v2';
 let db={products:[],sales:[],productions:[],movements:[],audit:[],users:[],cash:{open:false,opening:0,openedAt:null},config:{company:'Picolés Pro',cnpj:'',receipt:'Obrigado pela preferência!'}};
@@ -175,8 +175,12 @@ const today=()=>new Date().toISOString().slice(0,10);
 const uid=()=>crypto.randomUUID?crypto.randomUUID():'id-'+Date.now()+'-'+Math.random().toString(36).slice(2);
 const esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 
-// Inicializa Supabase
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+let supabaseClient = null;
+try {
+  if(SUPABASE_URL && SUPABASE_KEY) {
+    supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  }
+} catch(e) { console.error('Erro Supabase Init:', e); }
 
 window.addEventListener('DOMContentLoaded', ()=>{
   load();
@@ -189,9 +193,16 @@ window.addEventListener('DOMContentLoaded', ()=>{
 });
 
 function save(){localStorage.setItem(LS,JSON.stringify(db))}
+
 function load(){
-  try{const x=JSON.parse(localStorage.getItem(LS));if(x) db={...db,...x}}catch(e){} 
-  if(!db.products.length) seed(); 
+  try{
+    const x=JSON.parse(localStorage.getItem(LS));
+    if(x) db={...db,...x};
+  }catch(e){} 
+  if(!localStorage.getItem(LS+'_init')){
+    seed();
+    localStorage.setItem(LS+'_init', 'true');
+  }
   syncInputs();
 }
 
@@ -217,9 +228,11 @@ function syncInputs(){
 }
 
 function log(action,details=''){
-  db.audit.unshift({id:uid(),at:now(),user:currentUser.name,action,details});
+  const item = {id:uid(),at:now(),user:currentUser.name,action,details};
+  db.audit.unshift(item);
   db.audit=db.audit.slice(0,500);
   save();
+  if(supabaseClient) supabaseClient.from('auditoria').insert([item]).then();
 }
 
 function showToast(msg,error=false){
@@ -270,6 +283,7 @@ async function enterApp(){
   document.getElementById('loginScreen').style.display='none';
   document.getElementById('app').style.display='flex';
   syncInputs();
+  await fetchFromSupabase();
   renderAll();
   log('LOGIN','Entrada no sistema');
 }
@@ -278,6 +292,24 @@ async function logout(){
   if(supabaseClient) await supabaseClient.auth.signOut();
   document.getElementById('app').style.display='none';
   document.getElementById('loginScreen').style.display='grid';
+}
+
+async function fetchFromSupabase(){
+  if(!supabaseClient) return;
+  try {
+    const { data: prod } = await supabaseClient.from('produtos').select('*');
+    if(prod && prod.length) db.products = prod;
+
+    const { data: vts } = await supabaseClient.from('vendas').select('*');
+    if(vts) db.sales = vts;
+
+    const { data: movs } = await supabaseClient.from('movimentacoes').select('*');
+    if(movs) db.movements = movs;
+
+    save();
+    renderAll();
+    showToast('Sincronizado com o Supabase.');
+  } catch(e) { console.log('Sincronização em nuvem pendente:', e); }
 }
 
 function renderAll(){
@@ -291,6 +323,7 @@ function renderAll(){
   renderAudit();
   renderUsers();
   renderCashStatus();
+  renderSalesHistory();
 }
 
 function renderDashboard(){
@@ -330,91 +363,105 @@ function addCart(id){
   if(!p||p.qty<=0)return showToast('Produto sem estoque.',true);
   const i=cart.find(x=>x.id===id);
   if(i){
-    if(i.qty>=p.qty)return showToast('Estoque insuficiente.',true);
+    if(i.qty + 1 > p.qty) return showToast('Estoque insuficiente.', true);
     i.qty++;
-  }else cart.push({id:p.id,name:p.name,price:p.price,cost:p.cost,qty:1});
-  renderCart();
-}
-
-function changeQty(id,delta){
-  const i=cart.find(x=>x.id===id),p=db.products.find(x=>x.id===id);
-  if(!i||!p)return;
-  if(i.qty+delta>p.qty)return showToast('Estoque insuficiente.',true);
-  i.qty+=delta;
-  if(i.qty<=0)cart=cart.filter(x=>x.id!==id);
+  } else {
+    cart.push({ id: p.id, name: p.name, price: p.price, cost: p.cost, qty: 1 });
+  }
   renderCart();
 }
 
 function renderCart(){
-  const box=document.getElementById('cart'),sub=cart.reduce((a,i)=>a+i.price*i.qty,0),disc=Math.max(0,Number(document.getElementById('discount')?.value)||0),total=Math.max(0,sub-disc);
-  document.getElementById('cartCount').textContent=cart.reduce((a,i)=>a+i.qty,0)+' itens';
-  document.getElementById('subtotal').textContent=money(sub);
-  document.getElementById('saleTotal').textContent=money(total);
-  box.innerHTML=cart.length?cart.map(i=>`<div class="cart-row"><div><b>${esc(i.name)}</b><br><small class="muted">${money(i.price)} un.</small></div><div class="qty"><button onclick="changeQty('${i.id}',-1)">-</button><b>${i.qty}</b><button onclick="changeQty('${i.id}',1)">+</button></div><b>${money(i.price*i.qty)}</b></div>`).join(''):'<div class="empty">Carrinho vazio</div>';
+  const el = document.getElementById('cart');
+  if(!cart.length){
+    el.innerHTML = '<div class="empty">Carrinho vazio</div>';
+    document.getElementById('subtotal').textContent = money(0);
+    document.getElementById('saleTotal').textContent = money(0);
+    document.getElementById('cartCount').textContent = '0 itens';
+    return;
+  }
+  let sub = 0, count = 0;
+  el.innerHTML = cart.map(i => {
+    sub += i.price * i.qty;
+    count += i.qty;
+    return `<div class="cart-row"><div><b>${esc(i.name)}</b><br><small class="muted">${money(i.price)} un.</small></div><div class="qty"><button onclick="updateCartQty('${i.id}',-1)">-</button><b>${i.qty}</b><button onclick="updateCartQty('${i.id}',1)">+</button></div><b>${money(i.price*i.qty)}</b></div>`;
+  }).join('');
+  const desc = Number(document.getElementById('discount')?.value)||0;
+  document.getElementById('subtotal').textContent = money(sub);
+  document.getElementById('saleTotal').textContent = money(Math.max(0, sub - desc));
+  document.getElementById('cartCount').textContent = count + ' itens';
+}
+
+function updateCartQty(id, delta){
+  const i = cart.find(x=>x.id===id);
+  if(!i) return;
+  const p = db.products.find(x=>x.id===id);
+  if(delta > 0 && i.qty + 1 > p.qty) return showToast('Limite de estoque atingido.', true);
+  i.qty += delta;
+  if(i.qty <= 0) cart = cart.filter(x=>x.id!==id);
+  renderCart();
 }
 
 function openPayment(){
-  if(!cart.length) return showToast('Carrinho vazio!', true);
-  const total = document.getElementById('saleTotal').textContent;
-  openModal('Finalizar Pagamento', `
-    <div class="field"><label>FORMA DE PAGAMENTO</label>
+  if(!cart.length) return showToast('Adicione produtos ao carrinho.', true);
+  const desc = Number(document.getElementById('discount')?.value)||0;
+  const sub = cart.reduce((a,i)=>a+i.price*i.qty,0);
+  const tot = Math.max(0, sub - desc);
+
+  openModal('Finalizar Venda', `
+    <h3>Total a Pagar: <span style="color:var(--ok)">${money(tot)}</span></h3>
+    <div class="field" style="margin-top:14px"><label>FORMA DE PAGAMENTO</label>
       <select id="payMethod" class="input">
-        <option value="PIX">PIX</option>
+        <option value="Dinheiro">Dinheiro</option>
+        <option value="Pix">Pix</option>
         <option value="Cartão de Crédito">Cartão de Crédito</option>
         <option value="Cartão de Débito">Cartão de Débito</option>
-        <option value="Dinheiro">Dinheiro</option>
       </select>
     </div>
-    <div class="field" style="margin-top:12px"><label>VALOR TOTAL</label><input class="input" value="${total}" readonly style="font-weight:bold; font-size:18px;"></div>
-    <button class="btn btn-success btn-block" style="margin-top:16px" onclick="confirmSale()">Confirmar Venda</button>
+    <button class="btn btn-success btn-block" style="margin-top:18px" onclick="confirmSale(${tot}, ${desc})">Confirmar Pagamento</button>
   `);
 }
 
-function confirmSale(){
-  const method = document.getElementById('payMethod').value;
-  const sub = cart.reduce((a,i)=>a+i.price*i.qty,0);
-  const disc = Math.max(0,Number(document.getElementById('discount')?.value)||0);
-  const total = Math.max(0,sub-disc);
+async function confirmSale(tot, desc){
+  const pay = document.getElementById('payMethod').value;
+  const num = db.sales.length + 1;
+  const sale = { id: uid(), number: num, date: now(), items: [...cart], subtotal: tot + desc, discount: desc, total: tot, payment: pay, user: currentUser.name, cancelled: false };
 
-  // Baixa no estoque
-  cart.forEach(i=>{
+  // Atualiza Estoque
+  cart.forEach(i => {
     const p = db.products.find(x=>x.id===i.id);
     if(p) p.qty -= i.qty;
   });
 
-  const sale = {
-    id: uid(),
-    number: db.sales.length + 1,
-    date: now(),
-    items: [...cart],
-    payment: method,
-    subtotal: sub,
-    discount: disc,
-    total: total,
-    user: currentUser.name,
-    cancelled: false
-  };
-
   db.sales.unshift(sale);
   save();
-  log('VENDA', `Venda #${sale.number} no valor de ${money(total)} em ${method}`);
-  
+
+  if(supabaseClient) {
+    await supabaseClient.from('vendas').insert([sale]);
+    for(let i of cart){
+      const p = db.products.find(x=>x.id===i.id);
+      if(p) await supabaseClient.from('produtos').update({ qty: p.qty }).eq('id', p.id);
+    }
+  }
+
   cart = [];
-  document.getElementById('discount').value = 0;
   closeModal();
   renderAll();
   showToast('Venda realizada com sucesso!');
+  log('VENDA', `Venda #${num} no valor de ${money(tot)} (${pay})`);
 }
 
 function renderSalesHistory(){
-  const q = (document.getElementById('historySearch')?.value || '').toLowerCase();
-  const body = document.getElementById('salesHistory');
-  body.innerHTML = db.sales.filter(s => String(s.number).includes(q) || s.payment.toLowerCase().includes(q)).map(s => `
+  const q = (document.getElementById('historySearch')?.value||'').toLowerCase();
+  const el = document.getElementById('salesHistory');
+  const sales = db.sales.filter(s => s.number.toString().includes(q) || s.payment.toLowerCase().includes(q));
+  
+  el.innerHTML = sales.map(s => `
     <tr>
-      <td>#${s.number}</td>
+      <td><b>#${s.number}</b></td>
       <td>${new Date(s.date).toLocaleString('pt-BR')}</td>
       <td>${s.items.map(i=>`${i.qty}x ${i.name}`).join(', ')}</td>
-      <td><span class="badge b-info">${s.payment}</span></td>
+      <td>${s.payment}</td>
       <td><b>${money(s.total)}</b></td>
       <td>${s.cancelled ? '<span class="badge b-danger">Cancelada</span>' : '<span class="badge b-ok">Concluída</span>'}</td>
       <td>${!s.cancelled ? `<button class="btn btn-danger btn-small" onclick="cancelSale('${s.id}')">Cancelar</button>` : ''}</td>
@@ -422,236 +469,236 @@ function renderSalesHistory(){
   `).join('') || '<tr><td colspan="7" class="empty">Nenhuma venda encontrada.</td></tr>';
 }
 
-function cancelSale(id){
-  const s = db.sales.find(x => x.id === id);
+async function cancelSale(id){
+  if(!confirm('Deseja realmente cancelar esta venda? O estoque será devolvido.')) return;
+  const s = db.sales.find(x=>x.id===id);
   if(!s) return;
-  if(confirm(`Deseja cancelar a venda #${s.number}?`)){
-    s.cancelled = true;
-    s.items.forEach(i => {
-      const p = db.products.find(x => x.id === i.id);
-      if(p) p.qty += i.qty;
-    });
-    save();
-    log('CANCELAMENTO', `Venda #${s.number} cancelada`);
-    renderAll();
-    showToast('Venda cancelada com sucesso!');
+
+  s.cancelled = true;
+  s.items.forEach(i => {
+    const p = db.products.find(x=>x.id===i.id);
+    if(p) p.qty += i.qty;
+  });
+
+  save();
+  if(supabaseClient) {
+    await supabaseClient.from('vendas').update({ cancelled: true }).eq('id', id);
+    for(let i of s.items){
+      const p = db.products.find(x=>x.id===i.id);
+      if(p) await supabaseClient.from('produtos').update({ qty: p.qty }).eq('id', p.id);
+    }
   }
+
+  renderAll();
+  showToast('Venda cancelada.');
+  log('CANCELAMENTO', `Venda #${s.number} foi cancelada`);
 }
 
 function renderStock(){
-  const q = (document.getElementById('stockSearch')?.value || '').toLowerCase();
-  document.getElementById('stockTable').innerHTML = db.products.filter(p => p.name.toLowerCase().includes(q)).map(p => `
+  const q = (document.getElementById('stockSearch')?.value||'').toLowerCase();
+  const el = document.getElementById('stockTable');
+  el.innerHTML = db.products.filter(p => p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q)).map(p => `
     <tr>
-      <td><b>${p.emoji||'🍧'} ${esc(p.name)}</b></td>
+      <td>${p.emoji||'🍧'} <b>${esc(p.name)}</b></td>
       <td>${esc(p.category)}</td>
       <td>${money(p.price)}</td>
       <td>${money(p.cost)}</td>
-      <td><b>${p.qty} un.</b></td>
-      <td>${p.min} un.</td>
+      <td><b>${p.qty}</b></td>
+      <td>${p.min}</td>
       <td>${p.qty <= p.min ? '<span class="badge b-danger">Baixo</span>' : '<span class="badge b-ok">Normal</span>'}</td>
       <td>
         <button class="btn btn-secondary btn-small" onclick="openProductModal('${p.id}')"><i class="fa-solid fa-pen"></i></button>
         <button class="btn btn-danger btn-small" onclick="deleteProduct('${p.id}')"><i class="fa-solid fa-trash"></i></button>
       </td>
     </tr>
-  `).join('') || '<tr><td colspan="8" class="empty">Nenhum produto em estoque.</td></tr>';
+  `).join('') || '<tr><td colspan="8" class="empty">Nenhum produto cadastrado.</td></tr>';
 }
 
 function openProductModal(id = null){
-  const p = db.products.find(x => x.id === id) || { name:'', category:'Frutas', price:0, cost:0, qty:0, min:5, emoji:'🍧' };
+  const p = id ? db.products.find(x=>x.id===id) : { name:'', category:'Frutas', price:'', cost:'', qty:'', min:10, emoji:'🍧' };
   openModal(id ? 'Editar Produto' : 'Novo Produto', `
     <div class="form-grid">
-      <div class="field"><label>NOME</label><input id="pName" class="input" value="${esc(p.name)}"></div>
-      <div class="field"><label>EMOJI</label><input id="pEmoji" class="input" value="${p.emoji}"></div>
-      <div class="field"><label>CATEGORIA</label><input id="pCat" class="input" value="${esc(p.category)}"></div>
-      <div class="field"><label>PREÇO DE VENDA</label><input id="pPrice" type="number" step=".01" class="input" value="${p.price}"></div>
-      <div class="field"><label>CUSTO</label><input id="pCost" type="number" step=".01" class="input" value="${p.cost}"></div>
-      <div class="field"><label>ESTOQUE INICIAL / QTD</label><input id="pQty" type="number" class="input" value="${p.qty}"></div>
-      <div class="field"><label>MÍNIMO DESEJADO</label><input id="pMin" type="number" class="input" value="${p.min}"></div>
+      <div class="field full"><label>NOME DO PRODUTO</label><input id="pName" class="input" value="${p.name}"></div>
+      <div class="field"><label>CATEGORIA</label><input id="pCat" class="input" value="${p.category}"></div>
+      <div class="field"><label>EMOJI/ÍCONE</label><input id="pEmoji" class="input" value="${p.emoji||'🍧'}"></div>
+      <div class="field"><label>PREÇO DE VENDA (R$)</label><input id="pPrice" class="input" type="number" step=".01" value="${p.price}"></div>
+      <div class="field"><label>CUSTO DE PRODUÇÃO (R$)</label><input id="pCost" class="input" type="number" step=".01" value="${p.cost}"></div>
+      <div class="field"><label>ESTOQUE ATUAL</label><input id="pQty" class="input" type="number" value="${p.qty}"></div>
+      <div class="field"><label>ESTOQUE MÍNIMO</label><input id="pMin" class="input" type="number" value="${p.min}"></div>
     </div>
-    <button class="btn btn-primary btn-block" style="margin-top:16px" onclick="saveProduct('${id || ''}')">Salvar Produto</button>
+    <button class="btn btn-primary btn-block" style="margin-top:18px" onclick="saveProduct('${id||''}')">Salvar Produto</button>
   `);
 }
 
-function saveProduct(id){
+async function saveProduct(id){
   const name = document.getElementById('pName').value.trim();
-  if(!name) return showToast('Digite o nome do produto', true);
+  const category = document.getElementById('pCat').value.trim();
+  const emoji = document.getElementById('pEmoji').value.trim() || '🍧';
+  const price = Number(document.getElementById('pPrice').value)||0;
+  const cost = Number(document.getElementById('pCost').value)||0;
+  const qty = Number(document.getElementById('pQty').value)||0;
+  const min = Number(document.getElementById('pMin').value)||0;
 
-  const data = {
-    name,
-    emoji: document.getElementById('pEmoji').value || '🍧',
-    category: document.getElementById('pCat').value || 'Geral',
-    price: Number(document.getElementById('pPrice').value)||0,
-    cost: Number(document.getElementById('pCost').value)||0,
-    qty: Number(document.getElementById('pQty').value)||0,
-    min: Number(document.getElementById('pMin').value)||5,
-  };
+  if(!name) return showToast('Informe o nome do produto.', true);
+
+  const item = { id: id || uid(), name, category, emoji, price, cost, qty, min };
 
   if(id){
-    const p = db.products.find(x => x.id === id);
-    Object.assign(p, data);
+    const idx = db.products.findIndex(x=>x.id===id);
+    if(idx!==-1) db.products[idx] = item;
   } else {
-    db.products.push({ id: uid(), ...data });
+    db.products.push(item);
   }
 
   save();
+
+  if(supabaseClient) {
+    await supabaseClient.from('produtos').upsert([item]);
+  }
+
   closeModal();
   renderAll();
   showToast('Produto salvo com sucesso!');
 }
 
-function deleteProduct(id){
-  if(confirm('Tem certeza que deseja excluir este produto?')){
-    db.products = db.products.filter(x => x.id !== id);
-    save();
-    renderAll();
-    showToast('Produto removido.');
+async function deleteProduct(id){
+  if(!confirm('Tem certeza de que deseja apagar este produto permanentemente?')) return;
+
+  db.products = db.products.filter(p => p.id !== id);
+  save();
+
+  if(supabaseClient){
+    const { error } = await supabaseClient.from('produtos').delete().eq('id', id);
+    if(error) showToast('Erro ao apagar no Supabase: ' + error.message, true);
   }
+
+  renderAll();
+  showToast('Produto apagado com sucesso!');
+  log('EXCLUSÃO', 'Produto ' + id + ' foi excluído');
 }
 
 function renderProduction(){
-  const select = document.getElementById('prodProduct');
-  select.innerHTML = db.products.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+  const sel = document.getElementById('prodProduct');
+  if(sel) sel.innerHTML = db.products.map(p => `<option value="${p.id}">${esc(p.name)}</option>`).join('');
 
   const d = today();
-  const prodToday = db.productions.filter(p => p.date.slice(0,10) === d).reduce((a,b)=>a+b.qty,0);
-  const prodMonth = db.productions.filter(p => p.date.slice(0,7) === d.slice(0,7)).reduce((a,b)=>a+b.qty,0);
-  const prodCost = db.productions.reduce((a,b)=>a+(b.cost*b.qty),0);
+  const prodsToday = db.productions.filter(p => p.date.slice(0,10) === d);
+  const qtyToday = prodsToday.reduce((a,p)=>a+p.qty,0);
+  const costToday = prodsToday.reduce((a,p)=>a+(p.cost*p.qty),0);
 
-  document.getElementById('prodToday').textContent = prodToday;
-  document.getElementById('prodMonth').textContent = prodMonth;
-  document.getElementById('prodCost').textContent = money(prodCost);
+  document.getElementById('prodToday').textContent = qtyToday;
+  document.getElementById('prodMonth').textContent = db.productions.reduce((a,p)=>a+p.qty,0);
+  document.getElementById('prodCost').textContent = money(costToday);
 
-  document.getElementById('productionTable').innerHTML = db.productions.map(p => `
+  document.getElementById('productionTable').innerHTML = db.productions.slice(0,20).map(p => `
     <tr>
       <td>${new Date(p.date).toLocaleString('pt-BR')}</td>
       <td><b>${esc(p.productName)}</b></td>
       <td>${p.qty} un.</td>
       <td>${money(p.cost * p.qty)}</td>
-      <td>${p.user}</td>
+      <td>${esc(p.user)}</td>
     </tr>
   `).join('') || '<tr><td colspan="5" class="empty">Nenhuma produção registrada.</td></tr>';
 }
 
-function registerProduction(){
+async function registerProduction(){
   const pid = document.getElementById('prodProduct').value;
-  const qty = Number(document.getElementById('prodQty').value) || 0;
-  const p = db.products.find(x => x.id === pid);
+  const qty = Number(document.getElementById('prodQty').value)||0;
+  if(qty <= 0) return showToast('Informe uma quantidade válida.', true);
 
-  if(!p || qty <= 0) return showToast('Selecione uma quantidade válida.', true);
+  const p = db.products.find(x=>x.id===pid);
+  if(!p) return;
 
   p.qty += qty;
-  db.productions.unshift({
-    id: uid(),
-    date: now(),
-    productId: p.id,
-    productName: p.name,
-    qty: qty,
-    cost: p.cost,
-    user: currentUser.name
-  });
-
+  const prod = { id: uid(), date: now(), productId: pid, productName: p.name, qty, cost: p.cost, user: currentUser.name };
+  db.productions.unshift(prod);
   save();
-  log('PRODUÇÃO', `Produção de ${qty} un. de ${p.name}`);
+
+  if(supabaseClient) {
+    await supabaseClient.from('producao').insert([prod]);
+    await supabaseClient.from('produtos').update({ qty: p.qty }).eq('id', p.id);
+  }
+
   renderAll();
-  showToast('Produção registrada e adicionada ao estoque!');
+  showToast('Produção registrada e estoque atualizado!');
 }
 
 function renderFinance(){
-  const balance = db.movements.reduce((a,m) => a + (m.type === 'suprimento' || m.type === 'venda' ? m.val : -m.val), db.cash.opening || 0);
-  const ins = db.movements.filter(m => m.val > 0 && (m.type === 'suprimento' || m.type === 'venda')).reduce((a,m)=>a+m.val,0);
-  const outs = db.movements.filter(m => m.type === 'sangria').reduce((a,m)=>a+m.val,0);
+  const ins = db.movements.filter(m=>m.type==='suprimento'||m.type==='venda').reduce((a,m)=>a+m.amount,0);
+  const outs = db.movements.filter(m=>m.type==='sangria').reduce((a,m)=>a+m.amount,0);
+  const balance = (db.cash.opening || 0) + ins - outs;
 
   document.getElementById('cashBalance').textContent = money(balance);
   document.getElementById('cashIn').textContent = money(ins);
   document.getElementById('cashOut').textContent = money(outs);
   document.getElementById('cashState').textContent = db.cash.open ? 'Aberto' : 'Fechado';
 
-  document.getElementById('financeTable').innerHTML = db.movements.map(m => `
+  document.getElementById('financeTable').innerHTML = db.movements.slice(0,20).map(m => `
     <tr>
       <td>${new Date(m.date).toLocaleString('pt-BR')}</td>
-      <td><span class="badge ${m.type === 'sangria' ? 'b-danger' : 'b-ok'}">${m.type.toUpperCase()}</span></td>
+      <td><span class="badge ${m.type==='sangria'?'b-danger':'b-ok'}">${m.type.toUpperCase()}</span></td>
       <td>${esc(m.desc)}</td>
-      <td><b>${money(m.val)}</b></td>
-      <td>${m.user}</td>
+      <td><b>${money(m.amount)}</b></td>
+      <td>${esc(m.user)}</td>
     </tr>
   `).join('') || '<tr><td colspan="5" class="empty">Nenhuma movimentação.</td></tr>';
 }
 
 function renderCashStatus(){
-  const cs = document.getElementById('cashStatus');
-  if(!cs) return;
-  cs.innerHTML = db.cash.open 
-    ? `<div class="alert info">Caixa ABERTO com saldo inicial de <b>${money(db.cash.opening)}</b>.</div>`
-    : `<div class="alert warn">Caixa FECHADO. Abra o caixa na tela de Financeiro para liberar vendas.</div>`;
+  const el = document.getElementById('cashStatus');
+  if(!db.cash.open){
+    el.innerHTML = '<div class="alert warn"><i class="fa-solid fa-lock"></i> O caixa está FECHADO. Abra o caixa no menu Financeiro para realizar vendas.</div>';
+  } else {
+    el.innerHTML = '';
+  }
 }
 
 function openCash(){
-  if(db.cash.open) return showToast('Caixa já está aberto.', true);
-  const val = prompt('Informe o valor de abertura (troco inicial):', '0.00');
-  if(val !== null){
-    db.cash = { open: true, opening: Number(val)||0, openedAt: now() };
-    save();
-    log('CAIXA', `Caixa aberto com ${money(val)}`);
-    renderAll();
-    showToast('Caixa aberto!');
-  }
+  if(db.cash.open) return showToast('O caixa já está aberto.', true);
+  const val = prompt('Valor de abertura (Fundo de Caixa - R$):', '0');
+  if(val === null) return;
+  db.cash = { open: true, opening: Number(val)||0, openedAt: now() };
+  save();
+  renderAll();
+  showToast('Caixa aberto com sucesso!');
+  log('CAIXA', 'Abertura de caixa com ' + money(val));
 }
 
 function closeCash(){
-  if(!db.cash.open) return showToast('Caixa já está fechado.', true);
-  if(confirm('Tem certeza que deseja fechar o caixa?')){
-    db.cash.open = false;
-    save();
-    log('CAIXA', 'Caixa fechado');
-    renderAll();
-    showToast('Caixa fechado com sucesso.');
-  }
+  if(!db.cash.open) return showToast('O caixa já está fechado.', true);
+  if(!confirm('Deseja fechar o caixa atual?')) return;
+  db.cash.open = false;
+  save();
+  renderAll();
+  showToast('Caixa fechado com sucesso.');
+  log('CAIXA', 'Fechamento de caixa');
 }
 
-function cashMovement(type){
-  if(!db.cash.open) return showToast('Caixa precisa estar aberto.', true);
-  const val = prompt(`Valor da ${type}:`, '0.00');
-  const desc = prompt(`Motivo/Descrição da ${type}:`, '');
-  if(val && desc){
-    db.movements.unshift({
-      id: uid(),
-      date: now(),
-      type: type,
-      desc: desc,
-      val: Number(val)||0,
-      user: currentUser.name
-    });
-    save();
-    renderAll();
-    showToast('Movimentação registrada.');
-  }
+async function cashMovement(type){
+  if(!db.cash.open) return showToast('Abra o caixa primeiro.', true);
+  const desc = prompt(`Descrição da ${type.toUpperCase()}:`);
+  if(!desc) return;
+  const val = Number(prompt('Valor (R$):'))||0;
+  if(val <= 0) return showToast('Valor inválido.', true);
+
+  const mov = { id: uid(), date: now(), type, desc, amount: val, user: currentUser.name };
+  db.movements.unshift(mov);
+  save();
+
+  if(supabaseClient) await supabaseClient.from('movimentacoes').insert([mov]);
+
+  renderAll();
+  showToast('Movimentação registrada.');
 }
 
 function renderReports(){
-  const f = document.getElementById('reportFrom').value;
-  const t = document.getElementById('reportTo').value;
-
-  let sales = db.sales.filter(s => !s.cancelled);
-  if(f) sales = sales.filter(s => s.date.slice(0,10) >= f);
-  if(t) sales = sales.filter(s => s.date.slice(0,10) <= t);
-
+  const sales = db.sales.filter(s=>!s.cancelled);
   const tot = sales.reduce((a,s)=>a+s.total,0);
-  const profit = sales.reduce((a,s)=>a+s.items.reduce((z,i)=>z+(i.price-i.cost)*i.qty,0),0);
   const itemsCount = sales.reduce((a,s)=>a+s.items.reduce((z,i)=>z+i.qty,0),0);
 
   document.getElementById('repSales').textContent = money(tot);
-  document.getElementById('repProfit').textContent = money(profit);
-  document.getElementById('repTicket').textContent = money(sales.length ? tot / sales.length : 0);
+  document.getElementById('repTicket').textContent = sales.length ? money(tot/sales.length) : money(0);
   document.getElementById('repItems').textContent = itemsCount;
-
-  const payMap = {};
-  sales.forEach(s => payMap[s.payment] = (payMap[s.payment]||0) + s.total);
-  document.getElementById('paymentReport').innerHTML = Object.entries(payMap).map(x => `
-    <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)">
-      <span>${x[0]}</span><b>${money(x[1])}</b>
-    </div>
-  `).join('') || '<div class="empty">Nenhum dado no período.</div>';
 }
 
 function renderAudit(){
@@ -670,11 +717,15 @@ function renderUsers(){
     <tr>
       <td><b>${esc(u.name)}</b></td>
       <td>${esc(u.email)}</td>
-      <td><span class="badge b-info">${esc(u.role)}</span></td>
-      <td><span class="badge b-ok">Ativo</span></td>
+      <td><span class="badge b-ok">${esc(u.role)}</span></td>
+      <td>${u.active ? 'Ativo' : 'Inativo'}</td>
       <td></td>
     </tr>
   `).join('');
+}
+
+function openUserModal(){
+  showToast('Para criar novos usuários na nuvem, utilize o Painel do Supabase.', false);
 }
 
 function saveConfig(){
@@ -685,22 +736,26 @@ function saveConfig(){
   showToast('Configurações salvas!');
 }
 
-function openModal(title, bodyHtml){
-  document.getElementById('modalTitle').textContent = title;
-  document.getElementById('modalBody').innerHTML = bodyHtml;
-  document.getElementById('modal').classList.add('show');
+function saveSupabase(){
+  const url = document.getElementById('sbUrl').value.trim();
+  const key = document.getElementById('sbKey').value.trim();
+  localStorage.setItem('sb_url', url);
+  localStorage.setItem('sb_key', key);
+  location.reload();
 }
 
-function closeModal(){
-  document.getElementById('modal').classList.remove('show');
+function clearSupabase(){
+  localStorage.removeItem('sb_url');
+  localStorage.removeItem('sb_key');
+  location.reload();
 }
 
 function exportBackup(){
   const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db));
-  const dlAnchorElem = document.createElement('a');
-  dlAnchorElem.setAttribute("href",     dataStr);
-  dlAnchorElem.setAttribute("download", `backup_picoles_pro_${today()}.json`);
-  dlAnchorElem.click();
+  const dl = document.createElement('a');
+  dl.setAttribute("href", dataStr);
+  dl.setAttribute("download", `backup_picoles_pro_${today()}.json`);
+  dl.click();
 }
 
 function importBackup(e){
@@ -712,19 +767,28 @@ function importBackup(e){
       db = JSON.parse(evt.target.result);
       save();
       renderAll();
-      showToast('Backup restaurado!');
-    } catch(err){
-      showToast('Arquivo de backup inválido.', true);
-    }
+      showToast('Backup restaurado com sucesso!');
+    } catch(err) { showToast('Arquivo JSON inválido.', true); }
   };
   reader.readAsText(file);
 }
 
 function resetData(){
-  if(confirm('ATENÇÃO: Deseja apagar todos os dados locais? Essa ação não pode ser desfeita.')){
+  if(confirm('Atenção: Isso apagará TODOS os dados locais. Confirma?')){
     localStorage.removeItem(LS);
+    localStorage.removeItem(LS+'_init');
     location.reload();
   }
+}
+
+function openModal(title, bodyHtml){
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalBody').innerHTML = bodyHtml;
+  document.getElementById('modal').classList.add('show');
+}
+
+function closeModal(){
+  document.getElementById('modal').classList.remove('show');
 }
 </script>
 </body>
