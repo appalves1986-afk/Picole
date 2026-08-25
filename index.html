@@ -27,7 +27,7 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}a{text-decoratio
 .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}.field{display:flex;flex-direction:column;gap:6px}.field.full{grid-column:1/-1}.field label{font-size:12px;font-weight:800;color:var(--muted)}.input{width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:10px;background:var(--bg);color:var(--text);outline:none}.input:focus{border-color:var(--p);box-shadow:0 0 0 3px rgba(79,70,229,.12)}
 .toolbar{display:flex;gap:9px;align-items:center;flex-wrap:wrap}.toolbar .input{max-width:260px}
 .table-wrap{overflow:auto}table{width:100%;border-collapse:collapse}th,td{padding:12px 9px;border-bottom:1px solid var(--border);text-align:left;white-space:nowrap;font-size:13px}th{color:var(--muted);font-size:11px;text-transform:uppercase;background:rgba(100,116,139,.06)}.badge{display:inline-flex;padding:5px 8px;border-radius:999px;font-size:11px;font-weight:800}.b-ok{background:#d1fae5;color:#047857}.b-warn{background:#fef3c7;color:#92400e}.b-danger{background:#fee2e2;color:#b91c1c}.b-info{background:#dbeafe;color:#1d4ed8}
-.products{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;max-height:58vh;overflow:auto}.product{border:1px solid var(--border);background:var(--card);border-radius:13px;padding:12px;text-align:left;transition:.15s}.product:hover{transform:translateY(-2px);border-color:var(--p)}.product.out{opacity:.45;pointer-events:none}.product .emoji{font-size:24px}.product b{display:block;margin-top:6px;font-size:13px}.product small{color:var(--muted)}.product strong{display:block;color:var(--ok);margin-top:8px}
+.products{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;max-height:58vh;overflow:auto}.product{border:1px solid var(--border);background:var(--card);border-radius:13px;padding:12px;text-align:left;transition:.15s;cursor:pointer}.product:hover{transform:translateY(-2px);border-color:var(--p)}.product.out{opacity:.45;pointer-events:none}.product .emoji{font-size:24px}.product b{display:block;margin-top:6px;font-size:13px}.product small{color:var(--muted)}.product strong{display:block;color:var(--ok);margin-top:8px}
 .cart-list{max-height:45vh;overflow:auto}.cart-row{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)}.qty{display:flex;align-items:center;gap:6px}.qty button{width:27px;height:27px;border:1px solid var(--border);background:var(--card);color:var(--text);border-radius:7px}.totals{margin-top:14px;border-top:1px solid var(--border);padding-top:12px}.total-line{display:flex;justify-content:space-between;margin:7px 0}.total-final{font-size:24px;font-weight:800;color:var(--ok)}
 .bar{height:10px;background:var(--bg);border-radius:999px;overflow:hidden}.bar span{display:block;height:100%;background:linear-gradient(90deg,var(--p),#8b5cf6);border-radius:inherit}
 .empty{text-align:center;padding:35px;color:var(--muted)}.alert{padding:12px;border-radius:10px;margin-bottom:12px;font-size:13px}.alert.warn{background:#fff7ed;color:#9a3412;border:1px solid #fed7aa}.alert.info{background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe}
@@ -132,7 +132,7 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}a{text-decoratio
       </div>
 
       <div class="page" id="page-relatorios">
-        <div class="card"><div class="card-head"><h3>Relatórios</h3><div class="toolbar"><input id="reportFrom" class="input" type="date"><input id="reportTo" class="input" type="date"><button class="btn btn-primary" onclick="renderReports()"><i class="fa-solid fa-filter"></i> Filtrar</button></div></div><div class="grid g4"><div class="card kpi"><div><h3 id="repSales">R$ 0,00</h3><p>Vendas</p></div></div><div class="card kpi"><div><h3 id="repProfit">R$ 0,00</h3><p>Lucro</p></div></div><div class="card kpi"><div><h3 id="repTicket">R$ 0,00</h3><p>Ticket médio</p></div></div><div class="card kpi"><div><h3 id="repItems">0</h3><p>Itens vendidos</p></div></div></div></div>
+        <div class="card"><div class="card-head"><h3>Relatórios</h3><div class="toolbar"><input id="reportFrom" class="input" type="date"><input id="reportTo" class="input" type="date"><button class="btn btn-primary" onclick="renderReports()"><i class="fa-solid fa-filter"></i> Filtrar</button></div></div><div class="grid g4" style="margin-top:14px"><div class="card kpi"><div><h3 id="repSales">R$ 0,00</h3><p>Vendas</p></div></div><div class="card kpi"><div><h3 id="repProfit">R$ 0,00</h3><p>Lucro</p></div></div><div class="card kpi"><div><h3 id="repTicket">R$ 0,00</h3><p>Ticket médio</p></div></div><div class="card kpi"><div><h3 id="repItems">0</h3><p>Itens vendidos</p></div></div></div></div>
         <div class="grid g2" style="margin-top:18px"><div class="card"><div class="card-head"><h3>Por pagamento</h3></div><div id="paymentReport"></div></div><div class="card"><div class="card-head"><h3>Por produto</h3></div><div class="table-wrap"><table><thead><tr><th>Produto</th><th>Qtd.</th><th>Faturamento</th><th>Lucro</th></tr></thead><tbody id="productReport"></tbody></table></div></div></div>
       </div>
 
@@ -162,157 +162,157 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}a{text-decoratio
 /* ============================================================
     PICOLÉS PRO V2 - SUPABASE FULL CONECTADO & SINCRONIZADO
 ============================================================ */
-let SUPABASE_URL = localStorage.getItem('sb_url') || 'https://iaamdwnjhrzynmxjtshe.supabase.co';
+let SUPABASE_URL = localStorage.getItem('sb_url') || 'https://iaamdwnjhrzynmxytshe.supabase.co';
 let SUPABASE_KEY = localStorage.getItem('sb_key') || 'sb_publishable_TdPMJXO02koPQ75j2fCs9A_kGcIQOaj';
 
-const LS='picoles_pro_v2';
-let db={products:[],sales:[],productions:[],movements:[],audit:[],users:[],cash:{open:false,opening:0,openedAt:null},config:{company:'Picolés Pro',cnpj:'',receipt:'Obrigado pela preferência!'}};
-let cart=[], currentUser={id:'local-admin',name:'Administrador',email:'admin@local',role:'Administrador'};
+const LS = 'picoles_pro_v2';
+let db = { products: [], sales: [], productions: [], movements: [], audit: [], users: [], cash: { open: false, opening: 0, openedAt: null }, config: { company: 'Picolés Pro', cnpj: '', receipt: 'Obrigado pela preferência!' } };
+let cart = [], currentUser = { id: 'local-admin', name: 'Administrador', email: 'admin@local', role: 'Administrador' };
 
-const money=n=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(n)||0);
-const now=()=>new Date().toISOString();
-const today=()=>new Date().toISOString().slice(0,10);
-const uid=()=>crypto.randomUUID?crypto.randomUUID():'id-'+Date.now()+'-'+Math.random().toString(36).slice(2);
-const esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const money = n => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(n) || 0);
+const now = () => new Date().toISOString();
+const today = () => new Date().toISOString().slice(0, 10);
+const uid = () => crypto.randomUUID ? crypto.randomUUID() : 'id-' + Date.now() + '-' + Math.random().toString(36).slice(2);
+const esc = s => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
 let supabaseClient = null;
 try {
-  if(SUPABASE_URL && SUPABASE_KEY) {
+  if (SUPABASE_URL && SUPABASE_KEY) {
     supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
   }
-} catch(e) { console.error('Erro Supabase Init:', e); }
+} catch (e) { console.error('Erro Supabase Init:', e); }
 
-window.addEventListener('DOMContentLoaded', ()=>{
+window.addEventListener('DOMContentLoaded', () => {
   load();
   document.getElementById('sbUrl').value = SUPABASE_URL;
   document.getElementById('sbKey').value = SUPABASE_KEY;
-  setInterval(()=>{
+  setInterval(() => {
     const c = document.getElementById('clock');
-    if(c) c.textContent = new Date().toLocaleTimeString('pt-BR');
-  },1000);
+    if (c) c.textContent = new Date().toLocaleTimeString('pt-BR');
+  }, 1000);
 });
 
-function save(){localStorage.setItem(LS,JSON.stringify(db))}
+function save() { localStorage.setItem(LS, JSON.stringify(db)); }
 
-function load(){
-  try{
-    const x=JSON.parse(localStorage.getItem(LS));
-    if(x) db={...db,...x};
-  }catch(e){} 
-  if(!localStorage.getItem(LS+'_init')){
+function load() {
+  try {
+    const x = JSON.parse(localStorage.getItem(LS));
+    if (x) db = { ...db, ...x };
+  } catch (e) {}
+  if (!localStorage.getItem(LS + '_init')) {
     seed();
-    localStorage.setItem(LS+'_init', 'true');
+    localStorage.setItem(LS + '_init', 'true');
   }
   syncInputs();
 }
 
-function seed(){
-  db.products=[
-    {id:uid(),name:'Picolé de Morango',category:'Frutas',price:4.5,cost:1.8,qty:60,min:10,emoji:'🍓'},
-    {id:uid(),name:'Picolé de Chocolate',category:'Cremoso',price:5,cost:2.1,qty:45,min:10,emoji:'🍫'},
-    {id:uid(),name:'Picolé de Limão',category:'Frutas',price:4,cost:1.4,qty:35,min:8,emoji:'🍋'},
-    {id:uid(),name:'Picolé de Coco',category:'Cremoso',price:5,cost:2,qty:8,min:10,emoji:'🥥'}
+function seed() {
+  db.products = [
+    { id: uid(), name: 'Picolé de Morango', category: 'Frutas', price: 4.5, cost: 1.8, qty: 60, min: 10, emoji: '🍓' },
+    { id: uid(), name: 'Picolé de Chocolate', category: 'Cremoso', price: 5, cost: 2.1, qty: 45, min: 10, emoji: '🍫' },
+    { id: uid(), name: 'Picolé de Limão', category: 'Frutas', price: 4, cost: 1.4, qty: 35, min: 8, emoji: '🍋' },
+    { id: uid(), name: 'Picolé de Coco', category: 'Cremoso', price: 5, cost: 2, qty: 8, min: 10, emoji: '🥥' }
   ];
-  db.users=[{id:'local-admin',name:'Administrador',email:'admin@local',role:'Administrador',active:true}];
-  db.config={company:'Picolés Pro',cnpj:'',receipt:'Obrigado pela preferência!'};
+  db.users = [{ id: 'local-admin', name: 'Administrador', email: 'admin@local', role: 'Administrador', active: true }];
+  db.config = { company: 'Picolés Pro', cnpj: '', receipt: 'Obrigado pela preferência!' };
   save();
 }
 
-function syncInputs(){
-  document.getElementById('cfgCompany').value=db.config.company||'';
-  document.getElementById('cfgCnpj').value=db.config.cnpj||'';
-  document.getElementById('cfgReceipt').value=db.config.receipt||'';
-  document.getElementById('userName').textContent=currentUser.name;
-  document.getElementById('userRole').textContent=currentUser.role;
-  document.getElementById('userAvatar').textContent=(currentUser.name||'A')[0].toUpperCase();
+function syncInputs() {
+  document.getElementById('cfgCompany').value = db.config.company || '';
+  document.getElementById('cfgCnpj').value = db.config.cnpj || '';
+  document.getElementById('cfgReceipt').value = db.config.receipt || '';
+  document.getElementById('userName').textContent = currentUser.name;
+  document.getElementById('userRole').textContent = currentUser.role;
+  document.getElementById('userAvatar').textContent = (currentUser.name || 'A')[0].toUpperCase();
 }
 
-function log(action,details=''){
-  const item = {id:uid(),at:now(),user:currentUser.name,action,details};
+function log(action, details = '') {
+  const item = { id: uid(), at: now(), user: currentUser.name, action, details };
   db.audit.unshift(item);
-  db.audit=db.audit.slice(0,500);
+  db.audit = db.audit.slice(0, 500);
   save();
-  if(supabaseClient) supabaseClient.from('auditoria').insert([item]).then();
+  if (supabaseClient) supabaseClient.from('auditoria').insert([item]).then();
 }
 
-function showToast(msg,error=false){
-  const d=document.createElement('div');
-  d.className='toast'+(error?' error':'');
-  d.textContent=msg;
+function showToast(msg, error = false) {
+  const d = document.createElement('div');
+  d.className = 'toast' + (error ? ' error' : '');
+  d.textContent = msg;
   document.getElementById('toasts').appendChild(d);
-  setTimeout(()=>d.remove(),3200);
+  setTimeout(() => d.remove(), 3200);
 }
 
-function go(page){
-  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
-  document.querySelector('#page-'+page).classList.add('active');
-  document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===page));
-  const t={dashboard:'Dashboard',vendas:'Caixa / Vendas',estoque:'Estoque',producao:'Produção',financeiro:'Financeiro',relatorios:'Relatórios',auditoria:'Auditoria',usuarios:'Usuários',config:'Configurações'};
-  document.getElementById('pageTitle').textContent=t[page]||page;
+function go(page) {
+  document.querySelectorAll('.page').forEach(x => x.classList.remove('active'));
+  document.querySelector('#page-' + page).classList.add('active');
+  document.querySelectorAll('.nav button').forEach(x => x.classList.toggle('active', x.dataset.page === page));
+  const t = { dashboard: 'Dashboard', vendas: 'Caixa / Vendas', estoque: 'Estoque', producao: 'Produção', financeiro: 'Financeiro', relatorios: 'Relatórios', auditoria: 'Auditoria', usuarios: 'Usuários', config: 'Configurações' };
+  document.getElementById('pageTitle').textContent = t[page] || page;
   renderAll();
   document.getElementById('sidebar').classList.remove('open');
 }
 
-document.querySelectorAll('.nav button').forEach(b=>b.addEventListener('click',()=>go(b.dataset.page)));
-function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open')}
-function toggleTheme(){const d=document.body;d.dataset.theme=d.dataset.theme==='dark'?'light':'dark';localStorage.setItem('theme',d.dataset.theme)}
+document.querySelectorAll('.nav button').forEach(b => b.addEventListener('click', () => go(b.dataset.page)));
+function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
+function toggleTheme() { const d = document.body; d.dataset.theme = d.dataset.theme === 'dark' ? 'light' : 'dark'; localStorage.setItem('theme', d.dataset.theme); }
 
-function login(){
-  const e=document.getElementById('loginEmail').value.trim(),p=document.getElementById('loginPassword').value;
-  if(supabaseClient && e !== 'admin@local'){
-    supabaseClient.auth.signInWithPassword({email:e,password:p}).then(({data,error})=>{
-      if(error)return showToast(error.message,true);
-      currentUser={id:data.user.id,name:data.user.user_metadata?.name||e.split('@')[0],email:e,role:data.user.user_metadata?.role||'Atendente'};
+function login() {
+  const e = document.getElementById('loginEmail').value.trim(), p = document.getElementById('loginPassword').value;
+  if (supabaseClient && e !== 'admin@local') {
+    supabaseClient.auth.signInWithPassword({ email: e, password: p }).then(({ data, error }) => {
+      if (error) return showToast(error.message, true);
+      currentUser = { id: data.user.id, name: data.user.user_metadata?.name || e.split('@')[0], email: e, role: data.user.user_metadata?.role || 'Atendente' };
       enterApp();
-    })
-  }else{
-    if(!e||!p)return showToast('Informe e-mail e senha.',true);
-    if(e==='admin@local'&&p==='Lara@2310'){
-      currentUser={id:'local-admin',name:'Administrador',email:e,role:'Administrador'};
+    });
+  } else {
+    if (!e || !p) return showToast('Informe e-mail e senha.', true);
+    if (e === 'admin@local' && p === 'Lara@2310') {
+      currentUser = { id: 'local-admin', name: 'Administrador', email: e, role: 'Administrador' };
       enterApp();
-    }else showToast('E-mail ou senha incorretos.',true);
+    } else showToast('E-mail ou senha incorretos.', true);
   }
 }
 
-function entrarModoLocal(){
-  currentUser={id:'local-admin',name:'Administrador',email:'admin@local',role:'Administrador'};
+function entrarModoLocal() {
+  currentUser = { id: 'local-admin', name: 'Administrador', email: 'admin@local', role: 'Administrador' };
   enterApp();
 }
 
-async function enterApp(){
-  document.getElementById('loginScreen').style.display='none';
-  document.getElementById('app').style.display='flex';
+async function enterApp() {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
   syncInputs();
   await fetchFromSupabase();
   renderAll();
-  log('LOGIN','Entrada no sistema');
+  log('LOGIN', 'Entrada no sistema');
 }
 
-async function logout(){
-  if(supabaseClient) await supabaseClient.auth.signOut();
-  document.getElementById('app').style.display='none';
-  document.getElementById('loginScreen').style.display='grid';
+async function logout() {
+  if (supabaseClient) await supabaseClient.auth.signOut();
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'grid';
 }
 
-async function fetchFromSupabase(){
-  if(!supabaseClient) return;
+async function fetchFromSupabase() {
+  if (!supabaseClient) return;
   try {
     const { data: prod } = await supabaseClient.from('produtos').select('*');
-    if(prod && prod.length) db.products = prod;
+    if (prod && prod.length) db.products = prod;
 
     const { data: vts } = await supabaseClient.from('vendas').select('*');
-    if(vts) db.sales = vts;
+    if (vts) db.sales = vts;
 
     const { data: movs } = await supabaseClient.from('movimentacoes').select('*');
-    if(movs) db.movements = movs;
+    if (movs) db.movements = movs;
 
     save();
     renderAll();
     showToast('Sincronizado com o Supabase.');
-  } catch(e) { console.log('Sincronização em nuvem pendente:', e); }
+  } catch (e) { console.log('Sincronização em nuvem pendente:', e); }
 }
 
-function renderAll(){
+function renderAll() {
   renderDashboard();
   renderProducts();
   renderCart();
@@ -326,182 +326,190 @@ function renderAll(){
   renderSalesHistory();
 }
 
-function renderDashboard(){
-  const d=today(),sales=db.sales.filter(s=>!s.cancelled&&s.date.slice(0,10)===d),fat=sales.reduce((a,s)=>a+s.total,0),profit=sales.reduce((a,s)=>a+s.items.reduce((z,i)=>z+(i.price-i.cost)*i.qty,0),0),low=db.products.filter(p=>p.qty<=p.min);
-  document.getElementById('kpiFaturamento').textContent=money(fat);
-  document.getElementById('kpiLucro').textContent=money(profit);
-  document.getElementById('kpiVendas').textContent=sales.length;
-  document.getElementById('kpiBaixo').textContent=low.length;
-  
-  document.getElementById('stockAlerts').innerHTML=low.length?low.map(p=>`<div style="margin-bottom:10px"><b>${esc(p.name)}</b><span class="badge b-danger" style="float:right">${p.qty} un.</span><div class="bar"><span style="width:${Math.min(100,p.qty/Math.max(1,p.min)*100)}%"></span></div></div>`).join(''):'<div class="empty">Nenhum alerta.</div>';
-  document.getElementById('recentSales').innerHTML=db.sales.filter(s=>!s.cancelled).slice(0,5).map(s=>`<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border)"><span>#${s.number}<small class="muted"> · ${s.payment}</small></span><b>${money(s.total)}</b></div>`).join('')||'<div class="empty">Nenhuma venda.</div>';
-  
-  const counts={};
-  sales.forEach(s=>s.items.forEach(i=>counts[i.name]=(counts[i.name]||0)+i.qty));
-  const top=Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,5);
-  document.getElementById('topProducts').innerHTML=top.length?top.map((x,i)=>`<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)"><span>${i+1}. ${esc(x[0])}</span><b>${x[1]} un.</b></div>`).join(''):'<div class="empty">Sem vendas hoje.</div>';
-  
-  const vals=[];
-  for(let i=6;i>=0;i--){
-    const dt=new Date();
-    dt.setDate(dt.getDate()-i);
-    const key=dt.toISOString().slice(0,10);
-    vals.push({key,val:db.sales.filter(s=>!s.cancelled&&s.date.slice(0,10)===key).reduce((a,s)=>a+s.total,0)});
+function renderDashboard() {
+  const d = today(), sales = db.sales.filter(s => !s.cancelled && String(s.date).slice(0, 10) === d), fat = sales.reduce((a, s) => a + s.total, 0), profit = sales.reduce((a, s) => a + (s.items ? s.items.reduce((z, i) => z + (i.price - i.cost) * i.qty, 0) : 0), 0), low = db.products.filter(p => p.qty <= p.min);
+  document.getElementById('kpiFaturamento').textContent = money(fat);
+  document.getElementById('kpiLucro').textContent = money(profit);
+  document.getElementById('kpiVendas').textContent = sales.length;
+  document.getElementById('kpiBaixo').textContent = low.length;
+
+  document.getElementById('stockAlerts').innerHTML = low.length ? low.map(p => `<div style="margin-bottom:10px"><b>${esc(p.name)}</b><span class="badge b-danger" style="float:right">${p.qty} un.</span><div class="bar"><span style="width:${Math.min(100, p.qty / Math.max(1, p.min) * 100)}%"></span></div></div>`).join('') : '<div class="empty">Nenhum alerta.</div>';
+  document.getElementById('recentSales').innerHTML = db.sales.filter(s => !s.cancelled).slice(0, 5).map(s => `<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border)"><span>#${s.number || ''}<small class="muted"> · ${s.payment || ''}</small></span><b>${money(s.total)}</b></div>`).join('') || '<div class="empty">Nenhuma venda.</div>';
+
+  const counts = {};
+  sales.forEach(s => (s.items || []).forEach(i => counts[i.name] = (counts[i.name] || 0) + i.qty));
+  const top = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 5);
+  document.getElementById('topProducts').innerHTML = top.length ? top.map((x, i) => `<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)"><span>${i + 1}. ${esc(x[0])}</span><b>${x[1]} un.</b></div>`).join('') : '<div class="empty">Sem vendas hoje.</div>';
+
+  const vals = [];
+  for (let i = 6; i >= 0; i--) {
+    const dt = new Date();
+    dt.setDate(dt.getDate() - i);
+    const key = dt.toISOString().slice(0, 10);
+    vals.push({ key, val: db.sales.filter(s => !s.cancelled && String(s.date).slice(0, 10) === key).reduce((a, s) => a + s.total, 0) });
   }
-  const max=Math.max(1,...vals.map(x=>x.val));
-  document.getElementById('salesChart').innerHTML=vals.map(x=>`<div style="display:grid;grid-template-columns:70px 1fr 90px;gap:8px;align-items:center;margin:11px 0"><small>${x.key.slice(5)}</small><div class="bar"><span style="width:${x.val/max*100}%"></span></div><b style="text-align:right">${money(x.val)}</b></div>`).join('');
+  const max = Math.max(1, ...vals.map(x => x.val));
+  document.getElementById('salesChart').innerHTML = vals.map(x => `<div style="display:grid;grid-template-columns:70px 1fr 90px;gap:8px;align-items:center;margin-bottom:8px"><small class="muted">${x.key.slice(5)}</small><div class="bar"><span style="width:${(x.val / max) * 100}%"></span></div><b>${money(x.val)}</b></div>`).join('');
 }
 
-function renderProducts(){
-  const q=(document.getElementById('saleSearch')?.value||'').toLowerCase();
-  document.getElementById('products').innerHTML=db.products.filter(p=>(p.name+p.category).toLowerCase().includes(q)).map(p=>`<button class="product ${p.qty<=0?'out':''}" onclick="addCart('${p.id}')"><span class="emoji">${p.emoji||'🍧'}</span><b>${esc(p.name)}</b><small>${esc(p.category)} · ${p.qty} un.</small><strong>${money(p.price)}</strong></button>`).join('')||'<div class="empty">Nenhum produto.</div>';
+function renderProducts() {
+  const q = (document.getElementById('saleSearch').value || '').toLowerCase();
+  const list = db.products.filter(p => p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q));
+  document.getElementById('products').innerHTML = list.length ? list.map(p => `
+    <div class="product ${p.qty <= 0 ? 'out' : ''}" onclick="addToCart('${p.id}')">
+      <span class="emoji">${p.emoji || '🍧'}</span>
+      <b>${esc(p.name)}</b>
+      <small>${esc(p.category)} · Est: ${p.qty}</small>
+      <strong>${money(p.price)}</strong>
+    </div>
+  `).join('') : '<div class="empty" style="grid-column:1/-1">Nenhum produto.</div>';
 }
 
-function addCart(id){
-  if(!db.cash.open) return showToast('Abra o caixa no menu Financeiro antes de vender.', true);
-  const p=db.products.find(x=>x.id===id);
-  if(!p||p.qty<=0)return showToast('Produto sem estoque.',true);
-  const i=cart.find(x=>x.id===id);
-  if(i){
-    if(i.qty + 1 > p.qty) return showToast('Estoque insuficiente.', true);
-    i.qty++;
+function addToCart(id) {
+  const p = db.products.find(x => x.id === id);
+  if (!p || p.qty <= 0) return showToast('Produto sem estoque.', true);
+  const item = cart.find(x => x.id === id);
+  if (item) {
+    if (item.qty + 1 > p.qty) return showToast('Estoque máximo atingido.', true);
+    item.qty++;
   } else {
     cart.push({ id: p.id, name: p.name, price: p.price, cost: p.cost, qty: 1 });
   }
   renderCart();
 }
 
-function renderCart(){
-  const el = document.getElementById('cart');
-  if(!cart.length){
-    el.innerHTML = '<div class="empty">Carrinho vazio</div>';
-    document.getElementById('subtotal').textContent = money(0);
-    document.getElementById('saleTotal').textContent = money(0);
-    document.getElementById('cartCount').textContent = '0 itens';
-    return;
-  }
-  let sub = 0, count = 0;
-  el.innerHTML = cart.map(i => {
-    sub += i.price * i.qty;
-    count += i.qty;
-    return `<div class="cart-row"><div><b>${esc(i.name)}</b><br><small class="muted">${money(i.price)} un.</small></div><div class="qty"><button onclick="updateCartQty('${i.id}',-1)">-</button><b>${i.qty}</b><button onclick="updateCartQty('${i.id}',1)">+</button></div><b>${money(i.price*i.qty)}</b></div>`;
-  }).join('');
-  const desc = Number(document.getElementById('discount')?.value)||0;
-  document.getElementById('subtotal').textContent = money(sub);
-  document.getElementById('saleTotal').textContent = money(Math.max(0, sub - desc));
-  document.getElementById('cartCount').textContent = count + ' itens';
-}
-
-function updateCartQty(id, delta){
-  const i = cart.find(x=>x.id===id);
-  if(!i) return;
-  const p = db.products.find(x=>x.id===id);
-  if(delta > 0 && i.qty + 1 > p.qty) return showToast('Limite de estoque atingido.', true);
-  i.qty += delta;
-  if(i.qty <= 0) cart = cart.filter(x=>x.id!==id);
+function updateCartQty(id, delta) {
+  const item = cart.find(x => x.id === id);
+  if (!item) return;
+  const p = db.products.find(x => x.id === id);
+  item.qty += delta;
+  if (p && item.qty > p.qty) { item.qty = p.qty; showToast('Estoque máximo atingido.', true); }
+  if (item.qty <= 0) cart = cart.filter(x => x.id !== id);
   renderCart();
 }
 
-function openPayment(){
-  if(!cart.length) return showToast('Adicione produtos ao carrinho.', true);
-  const desc = Number(document.getElementById('discount')?.value)||0;
-  const sub = cart.reduce((a,i)=>a+i.price*i.qty,0);
-  const tot = Math.max(0, sub - desc);
+function renderCart() {
+  document.getElementById('cartCount').textContent = cart.reduce((a, b) => a + b.qty, 0) + ' itens';
+  document.getElementById('cart').innerHTML = cart.length ? cart.map(i => `
+    <div class="cart-row">
+      <div><b>${esc(i.name)}</b><br><small class="muted">${money(i.price)} un.</small></div>
+      <div class="qty">
+        <button onclick="updateCartQty('${i.id}',-1)">-</button>
+        <b>${i.qty}</b>
+        <button onclick="updateCartQty('${i.id}',1)">+</button>
+      </div>
+      <b>${money(i.price * i.qty)}</b>
+    </div>
+  `).join('') : '<div class="empty">Carrinho vazio.</div>';
 
+  const sub = cart.reduce((a, b) => a + (b.price * b.qty), 0);
+  const desc = Number(document.getElementById('discount').value) || 0;
+  document.getElementById('subtotal').textContent = money(sub);
+  document.getElementById('saleTotal').textContent = money(Math.max(0, sub - desc));
+}
+
+function openPayment() {
+  if (!cart.length) return showToast('Carrinho vazio.', true);
+  const total = Math.max(0, cart.reduce((a, b) => a + (b.price * b.qty), 0) - (Number(document.getElementById('discount').value) || 0));
   openModal('Finalizar Venda', `
-    <h3>Total a Pagar: <span style="color:var(--ok)">${money(tot)}</span></h3>
-    <div class="field" style="margin-top:14px"><label>FORMA DE PAGAMENTO</label>
+    <h3>Total: ${money(total)}</h3>
+    <div class="field" style="margin-top:12px"><label>FORMA DE PAGAMENTO</label>
       <select id="payMethod" class="input">
         <option value="Dinheiro">Dinheiro</option>
         <option value="Pix">Pix</option>
-        <option value="Cartão de Crédito">Cartão de Crédito</option>
         <option value="Cartão de Débito">Cartão de Débito</option>
+        <option value="Cartão de Crédito">Cartão de Crédito</option>
       </select>
     </div>
-    <button class="btn btn-success btn-block" style="margin-top:18px" onclick="confirmSale(${tot}, ${desc})">Confirmar Pagamento</button>
+    <button class="btn btn-success btn-block" style="margin-top:16px" onclick="confirmSale()"><i class="fa-solid fa-check"></i> Confirmar Pagamento</button>
   `);
 }
 
-async function confirmSale(tot, desc){
-  const pay = document.getElementById('payMethod').value;
-  const num = db.sales.length + 1;
-  const sale = { id: uid(), number: num, date: now(), items: [...cart], subtotal: tot + desc, discount: desc, total: tot, payment: pay, user: currentUser.name, cancelled: false };
+async function confirmSale() {
+  const method = document.getElementById('payMethod').value;
+  const sub = cart.reduce((a, b) => a + (b.price * b.qty), 0);
+  const desc = Number(document.getElementById('discount').value) || 0;
+  const total = Math.max(0, sub - desc);
+  const sale = {
+    id: uid(),
+    number: db.sales.length + 1,
+    date: now(),
+    items: [...cart],
+    subtotal: sub,
+    discount: desc,
+    total: total,
+    payment: method,
+    user: currentUser.name,
+    cancelled: false
+  };
 
-  // Atualiza Estoque
-  cart.forEach(i => {
-    const p = db.products.find(x=>x.id===i.id);
-    if(p) p.qty -= i.qty;
-  });
-
-  db.sales.unshift(sale);
-  save();
-
-  if(supabaseClient) {
-    await supabaseClient.from('vendas').insert([sale]);
-    for(let i of cart){
-      const p = db.products.find(x=>x.id===i.id);
-      if(p) await supabaseClient.from('produtos').update({ qty: p.qty }).eq('id', p.id);
+  for (let item of cart) {
+    const p = db.products.find(x => x.id === item.id);
+    if (p) {
+      p.qty -= item.qty;
+      if (supabaseClient) await supabaseClient.from('produtos').update({ qty: p.qty }).eq('id', p.id);
     }
   }
 
+  db.sales.unshift(sale);
+  if (supabaseClient) await supabaseClient.from('vendas').insert([sale]);
+
   cart = [];
+  document.getElementById('discount').value = 0;
+  save();
   closeModal();
   renderAll();
   showToast('Venda realizada com sucesso!');
-  log('VENDA', `Venda #${num} no valor de ${money(tot)} (${pay})`);
+  log('VENDA', `Venda #${sale.number} - ${money(total)} (${method})`);
 }
 
-function renderSalesHistory(){
-  const q = (document.getElementById('historySearch')?.value||'').toLowerCase();
-  const el = document.getElementById('salesHistory');
-  const sales = db.sales.filter(s => s.number.toString().includes(q) || s.payment.toLowerCase().includes(q));
-  
-  el.innerHTML = sales.map(s => `
+function renderSalesHistory() {
+  const q = (document.getElementById('historySearch').value || '').toLowerCase();
+  const list = db.sales.filter(s => String(s.number).includes(q) || (s.payment || '').toLowerCase().includes(q));
+  document.getElementById('salesHistory').innerHTML = list.length ? list.map(s => `
     <tr>
-      <td><b>#${s.number}</b></td>
+      <td><b>#${s.number || ''}</b></td>
       <td>${new Date(s.date).toLocaleString('pt-BR')}</td>
-      <td>${s.items.map(i=>`${i.qty}x ${i.name}`).join(', ')}</td>
-      <td>${s.payment}</td>
+      <td>${s.items ? s.items.map(i => `${i.qty}x ${esc(i.name)}`).join(', ') : ''}</td>
+      <td><span class="badge b-info">${esc(s.payment || '')}</span></td>
       <td><b>${money(s.total)}</b></td>
       <td>${s.cancelled ? '<span class="badge b-danger">Cancelada</span>' : '<span class="badge b-ok">Concluída</span>'}</td>
       <td>${!s.cancelled ? `<button class="btn btn-danger btn-small" onclick="cancelSale('${s.id}')">Cancelar</button>` : ''}</td>
     </tr>
-  `).join('') || '<tr><td colspan="7" class="empty">Nenhuma venda encontrada.</td></tr>';
+  `).join('') : '<tr><td colspan="7" class="empty">Nenhuma venda.</td></tr>';
 }
 
-async function cancelSale(id){
-  if(!confirm('Deseja realmente cancelar esta venda? O estoque será devolvido.')) return;
-  const s = db.sales.find(x=>x.id===id);
-  if(!s) return;
-
+async function cancelSale(id) {
+  if (!confirm('Deseja realmente cancelar esta venda?')) return;
+  const s = db.sales.find(x => x.id === id);
+  if (!s) return;
   s.cancelled = true;
-  s.items.forEach(i => {
-    const p = db.products.find(x=>x.id===i.id);
-    if(p) p.qty += i.qty;
-  });
 
-  save();
-  if(supabaseClient) {
-    await supabaseClient.from('vendas').update({ cancelled: true }).eq('id', id);
-    for(let i of s.items){
-      const p = db.products.find(x=>x.id===i.id);
-      if(p) await supabaseClient.from('produtos').update({ qty: p.qty }).eq('id', p.id);
+  if (s.items) {
+    for (let item of s.items) {
+      const p = db.products.find(x => x.id === item.id);
+      if (p) {
+        p.qty += item.qty;
+        if (supabaseClient) await supabaseClient.from('produtos').update({ qty: p.qty }).eq('id', p.id);
+      }
     }
   }
 
+  if (supabaseClient) await supabaseClient.from('vendas').update({ cancelled: true }).eq('id', s.id);
+  save();
   renderAll();
   showToast('Venda cancelada.');
-  log('CANCELAMENTO', `Venda #${s.number} foi cancelada`);
+  log('CANCELAMENTO', `Venda #${s.number} cancelada`);
 }
 
-function renderStock(){
-  const q = (document.getElementById('stockSearch')?.value||'').toLowerCase();
-  const el = document.getElementById('stockTable');
-  el.innerHTML = db.products.filter(p => p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q)).map(p => `
+function renderStock() {
+  const q = (document.getElementById('stockSearch').value || '').toLowerCase();
+  const list = db.products.filter(p => p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q));
+  document.getElementById('stockTable').innerHTML = list.length ? list.map(p => `
     <tr>
-      <td>${p.emoji||'🍧'} <b>${esc(p.name)}</b></td>
+      <td>${p.emoji || '🍧'} <b>${esc(p.name)}</b></td>
       <td>${esc(p.category)}</td>
-      <td>${money(p.price)}</td>
+      <td><b>${money(p.price)}</b></td>
       <td>${money(p.cost)}</td>
       <td><b>${p.qty}</b></td>
       <td>${p.min}</td>
@@ -511,224 +519,233 @@ function renderStock(){
         <button class="btn btn-danger btn-small" onclick="deleteProduct('${p.id}')"><i class="fa-solid fa-trash"></i></button>
       </td>
     </tr>
-  `).join('') || '<tr><td colspan="8" class="empty">Nenhum produto cadastrado.</td></tr>';
+  `).join('') : '<tr><td colspan="8" class="empty">Nenhum produto no estoque.</td></tr>';
 }
 
-function openProductModal(id = null){
-  const p = id ? db.products.find(x=>x.id===id) : { name:'', category:'Frutas', price:'', cost:'', qty:'', min:10, emoji:'🍧' };
+function openProductModal(id = null) {
+  const p = id ? db.products.find(x => x.id === id) : { id: '', name: '', category: 'Frutas', price: '', cost: '', qty: '', min: 5, emoji: '🍧' };
   openModal(id ? 'Editar Produto' : 'Novo Produto', `
     <div class="form-grid">
-      <div class="field full"><label>NOME DO PRODUTO</label><input id="pName" class="input" value="${p.name}"></div>
-      <div class="field"><label>CATEGORIA</label><input id="pCat" class="input" value="${p.category}"></div>
-      <div class="field"><label>EMOJI/ÍCONE</label><input id="pEmoji" class="input" value="${p.emoji||'🍧'}"></div>
-      <div class="field"><label>PREÇO DE VENDA (R$)</label><input id="pPrice" class="input" type="number" step=".01" value="${p.price}"></div>
-      <div class="field"><label>CUSTO DE PRODUÇÃO (R$)</label><input id="pCost" class="input" type="number" step=".01" value="${p.cost}"></div>
-      <div class="field"><label>ESTOQUE ATUAL</label><input id="pQty" class="input" type="number" value="${p.qty}"></div>
-      <div class="field"><label>ESTOQUE MÍNIMO</label><input id="pMin" class="input" type="number" value="${p.min}"></div>
+      <input type="hidden" id="pId" value="${p.id}">
+      <div class="field"><label>EMOJI</label><input id="pEmoji" class="input" value="${esc(p.emoji)}"></div>
+      <div class="field"><label>NOME</label><input id="pName" class="input" value="${esc(p.name)}"></div>
+      <div class="field"><label>CATEGORIA</label><input id="pCat" class="input" value="${esc(p.category)}"></div>
+      <div class="field"><label>PREÇO DE VENDA (R$)</label><input id="pPrice" type="number" step=".01" class="input" value="${p.price}"></div>
+      <div class="field"><label>CUSTO (R$)</label><input id="pCost" type="number" step=".01" class="input" value="${p.cost}"></div>
+      <div class="field"><label>QUANTIDADE</label><input id="pQty" type="number" class="input" value="${p.qty}"></div>
+      <div class="field"><label>ESTOQUE MÍNIMO</label><input id="pMin" type="number" class="input" value="${p.min}"></div>
     </div>
-    <button class="btn btn-primary btn-block" style="margin-top:18px" onclick="saveProduct('${id||''}')">Salvar Produto</button>
+    <button class="btn btn-primary btn-block" style="margin-top:16px" onclick="saveProduct()"><i class="fa-solid fa-floppy-disk"></i> Salvar Produto</button>
   `);
 }
 
-async function saveProduct(id){
-  const name = document.getElementById('pName').value.trim();
-  const category = document.getElementById('pCat').value.trim();
-  const emoji = document.getElementById('pEmoji').value.trim() || '🍧';
-  const price = Number(document.getElementById('pPrice').value)||0;
-  const cost = Number(document.getElementById('pCost').value)||0;
-  const qty = Number(document.getElementById('pQty').value)||0;
-  const min = Number(document.getElementById('pMin').value)||0;
+async function saveProduct() {
+  const id = document.getElementById('pId').value || uid();
+  const prod = {
+    id,
+    emoji: document.getElementById('pEmoji').value || '🍧',
+    name: document.getElementById('pName').value.trim(),
+    category: document.getElementById('pCat').value.trim() || 'Geral',
+    price: Number(document.getElementById('pPrice').value) || 0,
+    cost: Number(document.getElementById('pCost').value) || 0,
+    qty: Number(document.getElementById('pQty').value) || 0,
+    min: Number(document.getElementById('pMin').value) || 0
+  };
 
-  if(!name) return showToast('Informe o nome do produto.', true);
+  if (!prod.name) return showToast('Nome do produto é obrigatório.', true);
 
-  const item = { id: id || uid(), name, category, emoji, price, cost, qty, min };
+  const idx = db.products.findIndex(x => x.id === id);
+  if (idx >= 0) db.products[idx] = prod;
+  else db.products.unshift(prod);
 
-  if(id){
-    const idx = db.products.findIndex(x=>x.id===id);
-    if(idx!==-1) db.products[idx] = item;
-  } else {
-    db.products.push(item);
+  if (supabaseClient) {
+    const { error } = await supabaseClient.from('produtos').upsert([prod]);
+    if (error) showToast('Erro ao salvar no Supabase: ' + error.message, true);
   }
 
   save();
-
-  if(supabaseClient) {
-    await supabaseClient.from('produtos').upsert([item]);
-  }
-
   closeModal();
   renderAll();
   showToast('Produto salvo com sucesso!');
 }
 
-async function deleteProduct(id){
-  if(!confirm('Tem certeza de que deseja apagar este produto permanentemente?')) return;
-
-  db.products = db.products.filter(p => p.id !== id);
-  save();
-
-  if(supabaseClient){
+async function deleteProduct(id) {
+  if (!confirm('Deseja excluir este produto?')) return;
+  db.products = db.products.filter(x => x.id !== id);
+  if (supabaseClient) {
     const { error } = await supabaseClient.from('produtos').delete().eq('id', id);
-    if(error) showToast('Erro ao apagar no Supabase: ' + error.message, true);
+    if (error) showToast('Erro ao apagar no Supabase: ' + error.message, true);
   }
-
+  save();
   renderAll();
   showToast('Produto apagado com sucesso!');
-  log('EXCLUSÃO', 'Produto ' + id + ' foi excluído');
 }
 
-function renderProduction(){
+function renderProduction() {
   const sel = document.getElementById('prodProduct');
-  if(sel) sel.innerHTML = db.products.map(p => `<option value="${p.id}">${esc(p.name)}</option>`).join('');
+  if (sel) sel.innerHTML = db.products.map(p => `<option value="${p.id}">${esc(p.name)}</option>`).join('');
+  const d = today(), prods = db.productions || [];
+  const todayProd = prods.filter(p => String(p.date).slice(0, 10) === d);
+  document.getElementById('prodToday').textContent = todayProd.reduce((a, b) => a + b.qty, 0);
+  document.getElementById('prodMonth').textContent = prods.reduce((a, b) => a + b.qty, 0);
+  document.getElementById('prodCost').textContent = money(prods.reduce((a, b) => a + b.cost, 0));
 
-  const d = today();
-  const prodsToday = db.productions.filter(p => p.date.slice(0,10) === d);
-  const qtyToday = prodsToday.reduce((a,p)=>a+p.qty,0);
-  const costToday = prodsToday.reduce((a,p)=>a+(p.cost*p.qty),0);
-
-  document.getElementById('prodToday').textContent = qtyToday;
-  document.getElementById('prodMonth').textContent = db.productions.reduce((a,p)=>a+p.qty,0);
-  document.getElementById('prodCost').textContent = money(costToday);
-
-  document.getElementById('productionTable').innerHTML = db.productions.slice(0,20).map(p => `
+  document.getElementById('productionTable').innerHTML = prods.length ? prods.map(p => `
     <tr>
       <td>${new Date(p.date).toLocaleString('pt-BR')}</td>
       <td><b>${esc(p.productName)}</b></td>
-      <td>${p.qty} un.</td>
-      <td>${money(p.cost * p.qty)}</td>
+      <td><b>${p.qty}</b></td>
+      <td>${money(p.cost)}</td>
       <td>${esc(p.user)}</td>
     </tr>
-  `).join('') || '<tr><td colspan="5" class="empty">Nenhuma produção registrada.</td></tr>';
+  `).join('') : '<tr><td colspan="5" class="empty">Nenhum registro de produção.</td></tr>';
 }
 
-async function registerProduction(){
-  const pid = document.getElementById('prodProduct').value;
-  const qty = Number(document.getElementById('prodQty').value)||0;
-  if(qty <= 0) return showToast('Informe uma quantidade válida.', true);
-
-  const p = db.products.find(x=>x.id===pid);
-  if(!p) return;
+async function registerProduction() {
+  const id = document.getElementById('prodProduct').value;
+  const qty = Number(document.getElementById('prodQty').value) || 0;
+  const p = db.products.find(x => x.id === id);
+  if (!p || qty <= 0) return showToast('Selecione um produto e quantidade válida.', true);
 
   p.qty += qty;
-  const prod = { id: uid(), date: now(), productId: pid, productName: p.name, qty, cost: p.cost, user: currentUser.name };
+  const prod = { id: uid(), productId: id, productName: p.name, qty, cost: p.cost * qty, date: now(), user: currentUser.name };
+  if (!db.productions) db.productions = [];
   db.productions.unshift(prod);
-  save();
 
-  if(supabaseClient) {
-    await supabaseClient.from('producao').insert([prod]);
+  if (supabaseClient) {
     await supabaseClient.from('produtos').update({ qty: p.qty }).eq('id', p.id);
   }
 
+  save();
   renderAll();
   showToast('Produção registrada e estoque atualizado!');
 }
 
-function renderFinance(){
-  const ins = db.movements.filter(m=>m.type==='suprimento'||m.type==='venda').reduce((a,m)=>a+m.amount,0);
-  const outs = db.movements.filter(m=>m.type==='sangria').reduce((a,m)=>a+m.amount,0);
-  const balance = (db.cash.opening || 0) + ins - outs;
-
-  document.getElementById('cashBalance').textContent = money(balance);
+function renderFinance() {
+  const movs = db.movements || [];
+  const ins = movs.filter(m => m.type === 'suprimento' || m.type === 'venda').reduce((a, b) => a + b.val, 0);
+  const outs = movs.filter(m => m.type === 'sangria').reduce((a, b) => a + b.val, 0);
+  document.getElementById('cashBalance').textContent = money(ins - outs);
   document.getElementById('cashIn').textContent = money(ins);
   document.getElementById('cashOut').textContent = money(outs);
   document.getElementById('cashState').textContent = db.cash.open ? 'Aberto' : 'Fechado';
 
-  document.getElementById('financeTable').innerHTML = db.movements.slice(0,20).map(m => `
+  document.getElementById('financeTable').innerHTML = movs.length ? movs.map(m => `
     <tr>
       <td>${new Date(m.date).toLocaleString('pt-BR')}</td>
-      <td><span class="badge ${m.type==='sangria'?'b-danger':'b-ok'}">${m.type.toUpperCase()}</span></td>
+      <td><span class="badge ${m.type === 'sangria' ? 'b-danger' : 'b-ok'}">${esc(m.type)}</span></td>
       <td>${esc(m.desc)}</td>
-      <td><b>${money(m.amount)}</b></td>
+      <td><b>${money(m.val)}</b></td>
       <td>${esc(m.user)}</td>
     </tr>
-  `).join('') || '<tr><td colspan="5" class="empty">Nenhuma movimentação.</td></tr>';
+  `).join('') : '<tr><td colspan="5" class="empty">Nenhuma movimentação.</td></tr>';
 }
 
-function renderCashStatus(){
+function renderCashStatus() {
   const el = document.getElementById('cashStatus');
-  if(!db.cash.open){
-    el.innerHTML = '<div class="alert warn"><i class="fa-solid fa-lock"></i> O caixa está FECHADO. Abra o caixa no menu Financeiro para realizar vendas.</div>';
+  if (!el) return;
+  if (!db.cash.open) {
+    el.innerHTML = `<div class="alert warn" style="display:flex;justify-content:space-between;align-items:center"><span><b>Atenção:</b> O caixa está fechado.</span><button class="btn btn-small btn-primary" onclick="openCash()">Abrir Caixa</button></div>`;
   } else {
     el.innerHTML = '';
   }
 }
 
-function openCash(){
-  if(db.cash.open) return showToast('O caixa já está aberto.', true);
-  const val = prompt('Valor de abertura (Fundo de Caixa - R$):', '0');
-  if(val === null) return;
-  db.cash = { open: true, opening: Number(val)||0, openedAt: now() };
+function openCash() {
+  const val = prompt('Informe o valor de abertura (R$):', '0');
+  if (val === null) return;
+  db.cash = { open: true, opening: Number(val) || 0, openedAt: now() };
+  if (!db.movements) db.movements = [];
+  db.movements.unshift({ id: uid(), type: 'suprimento', desc: 'Abertura de caixa', val: Number(val) || 0, date: now(), user: currentUser.name });
   save();
   renderAll();
-  showToast('Caixa aberto com sucesso!');
-  log('CAIXA', 'Abertura de caixa com ' + money(val));
+  showToast('Caixa aberto!');
 }
 
-function closeCash(){
-  if(!db.cash.open) return showToast('O caixa já está fechado.', true);
-  if(!confirm('Deseja fechar o caixa atual?')) return;
+function closeCash() {
+  if (!confirm('Deseja fechar o caixa?')) return;
   db.cash.open = false;
   save();
   renderAll();
-  showToast('Caixa fechado com sucesso.');
-  log('CAIXA', 'Fechamento de caixa');
+  showToast('Caixa fechado.');
 }
 
-async function cashMovement(type){
-  if(!db.cash.open) return showToast('Abra o caixa primeiro.', true);
-  const desc = prompt(`Descrição da ${type.toUpperCase()}:`);
-  if(!desc) return;
-  const val = Number(prompt('Valor (R$):'))||0;
-  if(val <= 0) return showToast('Valor inválido.', true);
-
-  const mov = { id: uid(), date: now(), type, desc, amount: val, user: currentUser.name };
-  db.movements.unshift(mov);
+function cashMovement(type) {
+  const val = prompt(`Valor da ${type} (R$):`);
+  if (!val) return;
+  const desc = prompt('Descrição/Motivo:') || type;
+  if (!db.movements) db.movements = [];
+  db.movements.unshift({ id: uid(), type, desc, val: Number(val) || 0, date: now(), user: currentUser.name });
   save();
-
-  if(supabaseClient) await supabaseClient.from('movimentacoes').insert([mov]);
-
   renderAll();
-  showToast('Movimentação registrada.');
+  showToast('Movimentação registrada!');
 }
 
-function renderReports(){
-  const sales = db.sales.filter(s=>!s.cancelled);
-  const tot = sales.reduce((a,s)=>a+s.total,0);
-  const itemsCount = sales.reduce((a,s)=>a+s.items.reduce((z,i)=>z+i.qty,0),0);
+function renderReports() {
+  const sales = db.sales.filter(s => !s.cancelled);
+  const total = sales.reduce((a, s) => a + s.total, 0);
+  const profit = sales.reduce((a, s) => a + (s.items ? s.items.reduce((z, i) => z + (i.price - i.cost) * i.qty, 0) : 0), 0);
+  const itemsCount = sales.reduce((a, s) => a + (s.items ? s.items.reduce((z, i) => z + i.qty, 0) : 0), 0);
 
-  document.getElementById('repSales').textContent = money(tot);
-  document.getElementById('repTicket').textContent = sales.length ? money(tot/sales.length) : money(0);
+  document.getElementById('repSales').textContent = money(total);
+  document.getElementById('repProfit').textContent = money(profit);
+  document.getElementById('repTicket').textContent = money(sales.length ? total / sales.length : 0);
   document.getElementById('repItems').textContent = itemsCount;
 }
 
-function renderAudit(){
-  document.getElementById('auditTable').innerHTML = db.audit.map(a => `
+function renderAudit() {
+  document.getElementById('auditTable').innerHTML = (db.audit || []).length ? db.audit.map(a => `
     <tr>
       <td>${new Date(a.at).toLocaleString('pt-BR')}</td>
       <td><b>${esc(a.user)}</b></td>
       <td><span class="badge b-info">${esc(a.action)}</span></td>
       <td>${esc(a.details)}</td>
     </tr>
-  `).join('') || '<tr><td colspan="4" class="empty">Sem registros de auditoria.</td></tr>';
+  `).join('') : '<tr><td colspan="4" class="empty">Nenhum registro.</td></tr>';
 }
 
-function renderUsers(){
-  document.getElementById('usersTable').innerHTML = db.users.map(u => `
+function renderUsers() {
+  document.getElementById('usersTable').innerHTML = (db.users || []).map(u => `
     <tr>
       <td><b>${esc(u.name)}</b></td>
       <td>${esc(u.email)}</td>
-      <td><span class="badge b-ok">${esc(u.role)}</span></td>
-      <td>${u.active ? 'Ativo' : 'Inativo'}</td>
+      <td><span class="badge b-info">${esc(u.role)}</span></td>
+      <td><span class="badge b-ok">Ativo</span></td>
       <td></td>
     </tr>
   `).join('');
 }
 
-function openUserModal(){
-  showToast('Para criar novos usuários na nuvem, utilize o Painel do Supabase.', false);
+function openUserModal() {
+  openModal('Novo Usuário', `
+    <div class="field"><label>NOME</label><input id="uName" class="input"></div>
+    <div class="field" style="margin-top:10px"><label>E-MAIL</label><input id="uEmail" type="email" class="input"></div>
+    <div class="field" style="margin-top:10px"><label>PERFIL</label>
+      <select id="uRole" class="input">
+        <option value="Atendente">Atendente</option>
+        <option value="Gerente">Gerente</option>
+        <option value="Administrador">Administrador</option>
+      </select>
+    </div>
+    <button class="btn btn-primary btn-block" style="margin-top:16px" onclick="saveUser()">Salvar Usuário</button>
+  `);
 }
 
-function saveConfig(){
+function saveUser() {
+  const name = document.getElementById('uName').value.trim();
+  const email = document.getElementById('uEmail').value.trim();
+  const role = document.getElementById('uRole').value;
+  if (!name || !email) return showToast('Preencha os campos.', true);
+
+  if (!db.users) db.users = [];
+  db.users.push({ id: uid(), name, email, role, active: true });
+  save();
+  closeModal();
+  renderUsers();
+  showToast('Usuário cadastrado com sucesso!');
+}
+
+function saveConfig() {
   db.config.company = document.getElementById('cfgCompany').value;
   db.config.cnpj = document.getElementById('cfgCnpj').value;
   db.config.receipt = document.getElementById('cfgReceipt').value;
@@ -736,58 +753,85 @@ function saveConfig(){
   showToast('Configurações salvas!');
 }
 
-function saveSupabase(){
+function saveSupabase() {
   const url = document.getElementById('sbUrl').value.trim();
   const key = document.getElementById('sbKey').value.trim();
   localStorage.setItem('sb_url', url);
   localStorage.setItem('sb_key', key);
-  location.reload();
+  SUPABASE_URL = url;
+  SUPABASE_KEY = key;
+  if (url && key) {
+    try {
+      supabaseClient = supabase.createClient(url, key);
+      showToast('Supabase reconectado!');
+      fetchFromSupabase();
+    } catch (e) {
+      showToast('Erro ao inicializar Supabase.', true);
+    }
+  }
 }
 
-function clearSupabase(){
+function clearSupabase() {
   localStorage.removeItem('sb_url');
   localStorage.removeItem('sb_key');
-  location.reload();
+  supabaseClient = null;
+  document.getElementById('sbUrl').value = '';
+  document.getElementById('sbKey').value = '';
+  showToast('Configurações do Supabase removidas.');
 }
 
-function exportBackup(){
-  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db));
-  const dl = document.createElement('a');
-  dl.setAttribute("href", dataStr);
-  dl.setAttribute("download", `backup_picoles_pro_${today()}.json`);
-  dl.click();
+function exportCSV() {
+  let csv = 'ID;Nome;Categoria;Preco;Custo;Quantidade\n';
+  db.products.forEach(p => {
+    csv += `${p.id};"${p.name}";"${p.category}";${p.price};${p.cost};${p.qty}\n`;
+  });
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'estoque.csv';
+  a.click();
 }
 
-function importBackup(e){
+function exportBackup() {
+  const data = JSON.stringify(db, null, 2);
+  const blob = new Blob([data], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'backup_picoles_pro.json';
+  a.click();
+}
+
+function importBackup(e) {
   const file = e.target.files[0];
-  if(!file) return;
+  if (!file) return;
   const reader = new FileReader();
-  reader.onload = function(evt){
+  reader.onload = function(evt) {
     try {
       db = JSON.parse(evt.target.result);
       save();
       renderAll();
       showToast('Backup restaurado com sucesso!');
-    } catch(err) { showToast('Arquivo JSON inválido.', true); }
+    } catch (err) {
+      showToast('Arquivo de backup inválido.', true);
+    }
   };
   reader.readAsText(file);
 }
 
-function resetData(){
-  if(confirm('Atenção: Isso apagará TODOS os dados locais. Confirma?')){
-    localStorage.removeItem(LS);
-    localStorage.removeItem(LS+'_init');
-    location.reload();
-  }
+function resetData() {
+  if (!confirm('Deseja realmente apagar TODOS os dados locais?')) return;
+  localStorage.removeItem(LS);
+  localStorage.removeItem(LS + '_init');
+  location.reload();
 }
 
-function openModal(title, bodyHtml){
+function openModal(title, contentHtml) {
   document.getElementById('modalTitle').textContent = title;
-  document.getElementById('modalBody').innerHTML = bodyHtml;
+  document.getElementById('modalBody').innerHTML = contentHtml;
   document.getElementById('modal').classList.add('show');
 }
 
-function closeModal(){
+function closeModal() {
   document.getElementById('modal').classList.remove('show');
 }
 </script>
