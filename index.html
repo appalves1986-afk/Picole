@@ -1,504 +1,99 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<meta name="theme-color" content="#4f46e5">
-<title>Picolés Pro — PDV Profissional V2</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<style>
-:root{--p:#4f46e5;--p2:#4338ca;--ok:#10b981;--danger:#ef4444;--warn:#f59e0b;--info:#0ea5e9;--bg:#f5f7fb;--card:#fff;--text:#172033;--muted:#64748b;--border:#e2e8f0;--dark:#111827;--sidebar:250px;--shadow:0 8px 30px rgba(15,23,42,.07)}
-[data-theme=dark]{--bg:#0b1020;--card:#111827;--text:#f8fafc;--muted:#94a3b8;--border:#263247;--dark:#020617;--shadow:0 8px 30px rgba(0,0,0,.25)}
-*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--text)}
-button,input,select,textarea{font:inherit}button{cursor:pointer}a{text-decoration:none;color:inherit}
-.app{display:flex;min-height:100vh}.sidebar{width:var(--sidebar);background:var(--dark);color:#fff;position:fixed;inset:0 auto 0 0;z-index:30;display:flex;flex-direction:column}
-.brand{padding:22px 18px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;gap:12px;align-items:center}.brand-icon{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:grid;place-items:center;font-size:20px}.brand b{display:block;font-size:16px}.brand small{color:#94a3b8}
-.nav{padding:14px 10px;overflow:auto}.nav button{width:100%;border:0;background:transparent;color:#aab4c7;padding:12px;border-radius:10px;text-align:left;display:flex;gap:12px;align-items:center;margin-bottom:3px;font-weight:600}.nav button:hover,.nav button.active{background:#1e293b;color:#fff}.nav button.active{box-shadow:inset 3px 0 var(--p)}.nav i{width:20px;text-align:center}
-.sidebar-bottom{margin-top:auto;padding:12px;border-top:1px solid rgba(255,255,255,.08)}.user-mini{display:flex;gap:10px;align-items:center;padding:10px}.avatar{width:34px;height:34px;border-radius:50%;background:#334155;display:grid;place-items:center;font-weight:800}
-.main{margin-left:var(--sidebar);width:calc(100% - var(--sidebar));min-width:0}.topbar{height:70px;background:var(--card);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;position:sticky;top:0;z-index:20}.topbar h2{font-size:19px;margin:0}.top-actions{display:flex;gap:8px;align-items:center}.icon-btn{width:40px;height:40px;border:1px solid var(--border);border-radius:10px;background:var(--card);color:var(--text)}.content{padding:24px;max-width:1600px;margin:auto}.page{display:none}.page.active{display:block}
-.grid{display:grid;gap:18px}.g4{grid-template-columns:repeat(4,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.sales-grid{grid-template-columns:1.35fr .85fr}
-.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px;box-shadow:var(--shadow)}.card-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:16px}.card-head h3{margin:0;font-size:16px}.muted{color:var(--muted);font-size:13px}
-.kpi{display:flex;align-items:center;gap:14px}.kpi-icon{width:48px;height:48px;border-radius:13px;display:grid;place-items:center;font-size:19px}.kpi h3{margin:0 0 3px;font-size:23px}.kpi p{margin:0;color:var(--muted);font-size:12px;font-weight:700;text-transform:uppercase}
-.btn{border:0;border-radius:10px;padding:10px 14px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;gap:8px}.btn-primary{background:var(--p);color:#fff}.btn-primary:hover{background:var(--p2)}.btn-success{background:var(--ok);color:#fff}.btn-danger{background:var(--danger);color:#fff}.btn-warning{background:var(--warn);color:#fff}.btn-secondary{background:var(--card);color:var(--text);border:1px solid var(--border)}.btn-small{padding:7px 9px;font-size:12px}.btn-block{width:100%}
-.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}.field{display:flex;flex-direction:column;gap:6px}.field.full{grid-column:1/-1}.field label{font-size:12px;font-weight:800;color:var(--muted)}.input{width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:10px;background:var(--bg);color:var(--text);outline:none}.input:focus{border-color:var(--p);box-shadow:0 0 0 3px rgba(79,70,229,.12)}
-.toolbar{display:flex;gap:9px;align-items:center;flex-wrap:wrap}.toolbar .input{max-width:260px}
-.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse}th,td{padding:12px 9px;border-bottom:1px solid var(--border);text-align:left;white-space:nowrap;font-size:13px}th{color:var(--muted);font-size:11px;text-transform:uppercase;background:rgba(100,116,139,.06)}.badge{display:inline-flex;padding:5px 8px;border-radius:999px;font-size:11px;font-weight:800}.b-ok{background:#d1fae5;color:#047857}.b-warn{background:#fef3c7;color:#92400e}.b-danger{background:#fee2e2;color:#b91c1c}.b-info{background:#dbeafe;color:#1d4ed8}
-.products{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;max-height:58vh;overflow:auto}.product{border:1px solid var(--border);background:var(--card);border-radius:13px;padding:12px;text-align:left;transition:.15s;cursor:pointer}.product:hover{transform:translateY(-2px);border-color:var(--p)}.product.out{opacity:.45;pointer-events:none}.product .emoji{font-size:24px}.product b{display:block;margin-top:6px;font-size:13px}.product small{color:var(--muted)}.product strong{display:block;color:var(--ok);margin-top:8px}
-.cart-list{max-height:45vh;overflow:auto}.cart-row{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)}.qty{display:flex;align-items:center;gap:6px}.qty button{width:27px;height:27px;border:1px solid var(--border);background:var(--card);color:var(--text);border-radius:7px}.totals{margin-top:14px;border-top:1px solid var(--border);padding-top:12px}.total-line{display:flex;justify-content:space-between;margin:7px 0}.total-final{font-size:24px;font-weight:800;color:var(--ok)}
-.bar{height:10px;background:var(--bg);border-radius:999px;overflow:hidden}.bar span{display:block;height:100%;background:linear-gradient(90deg,var(--p),#8b5cf6);border-radius:inherit}
-.empty{text-align:center;padding:35px;color:var(--muted)}.alert{padding:12px;border-radius:10px;margin-bottom:12px;font-size:13px}.alert.warn{background:#fff7ed;color:#9a3412;border:1px solid #fed7aa}.alert.info{background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe}
-.modal{display:none;position:fixed;inset:0;background:rgba(2,6,23,.68);z-index:100;padding:20px;align-items:center;justify-content:center}.modal.show{display:flex}.modal-box{width:min(620px,100%);max-height:90vh;overflow:auto;background:var(--card);border-radius:18px;padding:20px}.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}.modal-head h3{margin:0}.close{border:0;background:none;color:var(--muted);font-size:25px}
-.toast-wrap{position:fixed;right:20px;bottom:20px;z-index:200;display:flex;flex-direction:column;gap:8px}.toast{background:var(--dark);color:#fff;padding:12px 15px;border-radius:10px;box-shadow:var(--shadow);border-left:4px solid var(--ok);max-width:360px}.toast.error{border-color:var(--danger)}
-.login{min-height:100vh;display:grid;place-items:center;background:radial-gradient(circle at 20% 20%,#312e81,transparent 35%),linear-gradient(135deg,#0f172a,#312e81);padding:20px}.login-box{width:min(430px,100%);background:#fff;border-radius:22px;padding:28px;box-shadow:0 30px 80px rgba(0,0,0,.3)}.login-brand{text-align:center;margin-bottom:24px}.login-brand .brand-icon{margin:auto;color:#fff}.login-brand h1{margin:10px 0 4px;color:#111827}.login-brand p{margin:0;color:#64748b;font-size:13px}
-.mobile-menu{display:none}
-@media(max-width:1050px){.g4{grid-template-columns:repeat(2,1fr)}.sales-grid{grid-template-columns:1fr}.sidebar{transform:translateX(-100%);transition:.2s}.sidebar.open{transform:none}.main{margin-left:0;width:100%}.mobile-menu{display:grid}}
-@media(max-width:700px){.content{padding:12px}.topbar{padding:0 12px}.g3,.g2,.g4{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}.products{grid-template-columns:repeat(2,1fr)}.topbar h2{font-size:15px}}
-</style>
-</head>
-<body>
-
-<div id="loginScreen" class="login">
-  <div class="login-box">
-    <div class="login-brand">
-      <div class="brand-icon"><i class="fa-solid fa-ice-cream"></i></div>
-      <h1>Picolés Pro</h1>
-      <p>PDV Profissional V2</p>
-    </div>
-    <div class="alert info" id="loginMode">Modo Supabase Conectado.</div>
-    <div class="field"><label>E-MAIL</label><input id="loginEmail" class="input" type="email" placeholder="admin@empresa.com"></div>
-    <div class="field" style="margin-top:12px"><label>SENHA</label><input id="loginPassword" class="input" type="password" placeholder="••••••••"></div>
-    <button class="btn btn-primary btn-block" style="margin-top:16px" onclick="login()"><i class="fa-solid fa-right-to-bracket"></i> Entrar</button>
-    <button class="btn btn-secondary btn-block" style="margin-top:8px" onclick="entrarModoLocal()">Continuar no modo local</button>
-  </div>
-</div>
-
-<div id="app" class="app" style="display:none">
-  <aside class="sidebar" id="sidebar">
-    <div class="brand"><div class="brand-icon"><i class="fa-solid fa-ice-cream"></i></div><div><b>Picolés Pro</b><small>PDV V2</small></div></div>
-    <nav class="nav">
-      <button class="active" data-page="dashboard"><i class="fa-solid fa-chart-pie"></i> Dashboard</button>
-      <button data-page="vendas"><i class="fa-solid fa-cart-shopping"></i> Caixa / Vendas</button>
-      <button data-page="estoque"><i class="fa-solid fa-boxes-stacked"></i> Estoque</button>
-      <button data-page="producao"><i class="fa-solid fa-industry"></i> Produção</button>
-      <button data-page="financeiro"><i class="fa-solid fa-money-bill-transfer"></i> Financeiro</button>
-      <button data-page="relatorios"><i class="fa-solid fa-chart-column"></i> Relatórios</button>
-      <button data-page="auditoria"><i class="fa-solid fa-shield-halved"></i> Auditoria</button>
-      <button data-page="usuarios"><i class="fa-solid fa-users"></i> Usuários</button>
-      <button data-page="config"><i class="fa-solid fa-gear"></i> Configurações</button>
-    </nav>
-    <div class="sidebar-bottom"><div class="user-mini"><div class="avatar" id="userAvatar">A</div><div><b id="userName">Administrador</b><small id="userRole">Administrador</small></div></div><button class="btn btn-secondary btn-block" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Sair</button></div>
-  </aside>
-
-  <main class="main">
-    <header class="topbar">
-      <div style="display:flex;gap:10px;align-items:center"><button class="icon-btn mobile-menu" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button><h2 id="pageTitle">Dashboard</h2></div>
-      <div class="top-actions"><span class="muted" id="clock"></span><button class="icon-btn" onclick="toggleTheme()" title="Tema"><i class="fa-solid fa-moon"></i></button><button class="icon-btn" onclick="fetchFromSupabase()" title="Sincronizar Nuvem"><i class="fa-solid fa-rotate"></i></button></div>
-    </header>
-
-    <section class="content">
-      <div class="page active" id="page-dashboard">
-        <div class="grid g4">
-          <div class="card kpi"><div class="kpi-icon" style="background:#ede9fe;color:#6d28d9"><i class="fa-solid fa-sack-dollar"></i></div><div><h3 id="kpiFaturamento">R$ 0,00</h3><p>Faturamento hoje</p></div></div>
-          <div class="card kpi"><div class="kpi-icon" style="background:#d1fae5;color:#047857"><i class="fa-solid fa-arrow-trend-up"></i></div><div><h3 id="kpiLucro">R$ 0,00</h3><p>Lucro estimado</p></div></div>
-          <div class="card kpi"><div class="kpi-icon" style="background:#dbeafe;color:#1d4ed8"><i class="fa-solid fa-receipt"></i></div><div><h3 id="kpiVendas">0</h3><p>Vendas hoje</p></div></div>
-          <div class="card kpi"><div class="kpi-icon" style="background:#fef3c7;color:#92400e"><i class="fa-solid fa-box"></i></div><div><h3 id="kpiBaixo">0</h3><p>Estoque baixo</p></div></div>
-        </div>
-        <div class="grid g2" style="margin-top:18px">
-          <div class="card"><div class="card-head"><h3>Produtos mais vendidos</h3></div><div id="topProducts"></div></div>
-          <div class="card"><div class="card-head"><h3>Alertas de estoque</h3><button class="btn btn-secondary btn-small" onclick="go('estoque')">Ver estoque</button></div><div id="stockAlerts"></div></div>
-        </div>
-        <div class="grid g1" style="margin-top:18px">
-          <div class="card"><div class="card-head"><h3>Últimas vendas</h3><button class="btn btn-secondary btn-small" onclick="go('vendas')">Abrir caixa</button></div><div id="recentSales"></div></div>
-        </div>
-      </div>
-
-      <div class="page" id="page-vendas">
-        <div id="cashStatus"></div>
-        <div class="grid sales-grid">
-          <div class="card"><div class="card-head"><h3>Nova venda</h3><div class="toolbar"><input id="saleSearch" class="input" placeholder="Buscar produto..." oninput="renderProducts()"></div></div><div id="products" class="products"></div></div>
-          <div class="card"><div class="card-head"><h3>Carrinho</h3><span id="cartCount" class="badge b-info">0 itens</span></div><div id="cart" class="cart-list"></div><div class="totals"><div class="total-line"><span>Subtotal</span><b id="subtotal">R$ 0,00</b></div><div class="field"><label>DESCONTO (R$)</label><input id="discount" class="input" type="number" min="0" step=".01" value="0" oninput="renderCart()"></div><div class="total-line" style="margin-top:12px"><span>Total</span><b class="total-final" id="saleTotal">R$ 0,00</b></div><button class="btn btn-success btn-block" style="margin-top:12px" onclick="openPayment()"><i class="fa-solid fa-check"></i> Finalizar venda</button></div></div>
-        </div>
-        <div class="card" style="margin-top:18px"><div class="card-head"><h3>Histórico de vendas</h3><div class="toolbar"><input id="historySearch" class="input" placeholder="Buscar por número ou pagamento..." oninput="renderSalesHistory()"></div></div><div class="table-wrap"><table><thead><tr><th>Nº</th><th>Data</th><th>Itens</th><th>Pagamento</th><th>Total</th><th>Status</th></tr></thead><tbody id="salesHistory"></tbody></table></div></div>
-      </div>
-
-      <div class="page" id="page-estoque">
-        <div class="card"><div class="card-head"><h3>Estoque</h3><div class="toolbar"><input id="stockSearch" class="input" placeholder="Buscar produto..." oninput="renderStock()"><button class="btn btn-primary" onclick="openProductModal()"><i class="fa-solid fa-plus"></i> Novo produto</button></div></div><div class="table-wrap"><table><thead><tr><th>Emoji</th><th>Produto</th><th>Categoria</th><th>Preço</th><th>Custo</th><th>Qtd.</th><th>Mínimo</th><th>Ações</th></tr></thead><tbody id="stockTable"></tbody></table></div></div>
-      </div>
-
-      <div class="page" id="page-producao">
-        <div class="card"><div class="card-head"><h3>Registrar produção</h3></div><div class="form-grid"><div class="field"><label>PRODUTO</label><select id="prodProduct" class="input"></select></div><div class="field"><label>QUANTIDADE</label><input id="prodQty" class="input" type="number" min="1" value="1"></div></div><button class="btn btn-primary" style="margin-top:14px" onclick="registerProduction()"><i class="fa-solid fa-plus"></i> Registrar produção</button></div>
-      </div>
-
-      <div class="page" id="page-financeiro">
-        <div class="card"><div class="card-head"><h3>Movimentações de Caixa</h3></div><div class="table-wrap"><table><thead><tr><th>Data</th><th>Tipo</th><th>Descrição</th><th>Valor</th><th>Usuário</th></tr></thead><tbody id="financeTable"></tbody></table></div></div>
-      </div>
-
-      <div class="page" id="page-relatorios">
-        <div class="card"><div class="card-head"><h3>Relatórios de Vendas</h3></div><div id="paymentReport"></div></div>
-      </div>
-
-      <div class="page" id="page-auditoria">
-        <div class="card"><div class="card-head"><h3>Auditoria</h3></div><div class="table-wrap"><table><thead><tr><th>Data</th><th>Usuário</th><th>Ação</th><th>Detalhes</th></tr></thead><tbody id="auditTable"></tbody></table></div></div>
-      </div>
-
-      <div class="page" id="page-usuarios">
-        <div class="card"><div class="card-head"><h3>Usuários</h3></div><div class="table-wrap"><table><thead><tr><th>Nome</th><th>E-mail</th><th>Perfil</th></tr></thead><tbody id="usersTable"></tbody></table></div></div>
-      </div>
-
-      <div class="page" id="page-config">
-        <div class="grid g2">
-          <div class="card"><div class="card-head"><h3>Empresa</h3></div><div class="form-grid"><div class="field"><label>NOME</label><input id="cfgCompany" class="input"></div><div class="field"><label>CNPJ</label><input id="cfgCnpj" class="input"></div><div class="field full"><label>MENSAGEM DO RECIBO</label><textarea id="cfgReceipt" class="input" rows="3"></textarea></div></div><button class="btn btn-primary" style="margin-top:14px" onclick="saveConfig()">Salvar</button></div>
-          <div class="card"><div class="card-head"><h3>Supabase</h3><span id="supabaseStatus" class="badge b-ok">Conectado</span></div><div class="field"><label>PROJECT URL</label><input id="sbUrl" class="input" placeholder="https://xxxx.supabase.co"></div><div class="field" style="margin-top:10px"><label>ANON KEY</label><input id="sbKey" class="input" placeholder="eyJ..."></div><div class="toolbar" style="margin-top:14px"><button class="btn btn-primary" onclick="saveSupabase()"><i class="fa-solid fa-cloud"></i> Reconectar</button></div></div>
-        </div>
-      </div>
-    </section>
-  </main>
-</div>
-
-<div class="modal" id="modal"><div class="modal-box"><div class="modal-head"><h3 id="modalTitle">Modal</h3><button class="close" onclick="closeModal()">×</button></div><div id="modalBody"></div></div></div>
-<div class="toast-wrap" id="toasts"></div>
-
-<script>
-/* ============================================================
-    PICOLÉS PRO V2 - SUPABASE FULL CONECTADO & SINCRONIZADO
-============================================================ */
-let SUPABASE_URL = localStorage.getItem('sb_url') || 'https://iaamdwnjhrzynmxytshe.supabase.co';
-let SUPABASE_KEY = localStorage.getItem('sb_key') || 'sb_publishable_TdPMJXO02koPQ75j2fCs9A_kGcIQOaj';
-
-const LS = 'picoles_pro_v2';
-let db = { products: [], sales: [], productions: [], movements: [], audit: [], users: [], cash: { open: false, opening: 0, openedAt: null }, config: { company: 'Picolés Pro', cnpj: '', receipt: 'Obrigado pela preferência!' } };
-let cart = [], currentUser = { id: 'local-admin', name: 'Administrador', email: 'admin@local', role: 'Administrador' };
-
-const money = n => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(n) || 0);
-const now = () => new Date().toISOString();
-const today = () => new Date().toISOString().slice(0, 10);
-const uid = () => crypto.randomUUID ? crypto.randomUUID() : 'id-' + Date.now() + '-' + Math.random().toString(36).slice(2);
-const esc = s => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-
-let supabaseClient = null;
-try {
-  if (SUPABASE_URL && SUPABASE_KEY) {
-    supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+await supabaseClient.from('produtos').upsert(db.products);
   }
-} catch (e) { console.error('Erro Supabase Init:', e); }
 
-window.addEventListener('DOMContentLoaded', () => {
-  load();
-  document.getElementById('sbUrl').value = SUPABASE_URL;
-  document.getElementById('sbKey').value = SUPABASE_KEY;
-  setInterval(() => {
-    const c = document.getElementById('clock');
-    if (c) c.textContent = new Date().toLocaleTimeString('pt-BR');
-  }, 1000);
-});
-
-function save() { localStorage.setItem(LS, JSON.stringify(db)); }
-
-function load() {
-  try {
-    const x = JSON.parse(localStorage.getItem(LS));
-    if (x) db = { ...db, ...x };
-  } catch (e) {}
-  if (!localStorage.getItem(LS + '_init')) {
-    seed();
-    localStorage.setItem(LS + '_init', 'true');
-  }
-  syncInputs();
-}
-
-function seed() {
-  db.products = [
-    { id: uid(), name: 'Picolé de Morango', category: 'Frutas', price: 4.5, cost: 1.8, qty: 60, min: 10, emoji: '🍓' },
-    { id: uid(), name: 'Picolé de Chocolate', category: 'Cremoso', price: 5, cost: 2.1, qty: 45, min: 10, emoji: '🍫' },
-    { id: uid(), name: 'Picolé de Limão', category: 'Frutas', price: 4, cost: 1.4, qty: 35, min: 8, emoji: '🍋' },
-    { id: uid(), name: 'Picolé de Coco', category: 'Cremoso', price: 5, cost: 2, qty: 8, min: 10, emoji: '🥥' }
-  ];
-  db.users = [{ id: 'local-admin', name: 'Administrador', email: 'admin@local', role: 'Administrador', active: true }];
-  db.config = { company: 'Picolés Pro', cnpj: '', receipt: 'Obrigado pela preferência!' };
-  save();
-}
-
-function syncInputs() {
-  document.getElementById('cfgCompany').value = db.config.company || '';
-  document.getElementById('cfgCnpj').value = db.config.cnpj || '';
-  document.getElementById('cfgReceipt').value = db.config.receipt || '';
-  document.getElementById('userName').textContent = currentUser.name;
-  document.getElementById('userRole').textContent = currentUser.role;
-  document.getElementById('userAvatar').textContent = (currentUser.name || 'A')[0].toUpperCase();
-}
-
-function log(action, details = '') {
-  const item = { id: uid(), at: now(), user: currentUser.name, action, details };
-  db.audit.unshift(item);
-  db.audit = db.audit.slice(0, 500);
-  save();
-  if (supabaseClient) supabaseClient.from('auditoria').insert([item]).then();
-}
-
-function showToast(msg, error = false) {
-  const d = document.createElement('div');
-  d.className = 'toast' + (error ? ' error' : '');
-  d.textContent = msg;
-  document.getElementById('toasts').appendChild(d);
-  setTimeout(() => d.remove(), 3200);
-}
-
-function go(page) {
-  document.querySelectorAll('.page').forEach(x => x.classList.remove('active'));
-  document.querySelector('#page-' + page).classList.add('active');
-  document.querySelectorAll('.nav button').forEach(x => x.classList.toggle('active', x.dataset.page === page));
-  const t = { dashboard: 'Dashboard', vendas: 'Caixa / Vendas', estoque: 'Estoque', producao: 'Produção', financeiro: 'Financeiro', relatorios: 'Relatórios', auditoria: 'Auditoria', usuarios: 'Usuários', config: 'Configurações' };
-  document.getElementById('pageTitle').textContent = t[page] || page;
-  renderAll();
-  document.getElementById('sidebar').classList.remove('open');
-}
-
-document.querySelectorAll('.nav button').forEach(b => b.addEventListener('click', () => go(b.dataset.page)));
-function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
-function toggleTheme() { const d = document.body; d.dataset.theme = d.dataset.theme === 'dark' ? 'light' : 'dark'; localStorage.setItem('theme', d.dataset.theme); }
-
-function login() {
-  const e = document.getElementById('loginEmail').value.trim(), p = document.getElementById('loginPassword').value;
-  if (supabaseClient && e !== 'admin@local') {
-    supabaseClient.auth.signInWithPassword({ email: e, password: p }).then(({ data, error }) => {
-      if (error) return showToast(error.message, true);
-      currentUser = { id: data.user.id, name: data.user.user_metadata?.name || e.split('@')[0], email: e, role: data.user.user_metadata?.role || 'Atendente' };
-      enterApp();
-    });
-  } else {
-    if (!e || !p) return showToast('Informe e-mail e senha.', true);
-    if (e === 'admin@local' && p === 'Lara@2310') {
-      currentUser = { id: 'local-admin', name: 'Administrador', email: e, role: 'Administrador' };
-      enterApp();
-    } else showToast('E-mail ou senha incorretos.', true);
-  }
-}
-
-function entrarModoLocal() {
-  currentUser = { id: 'local-admin', name: 'Administrador', email: 'admin@local', role: 'Administrador' };
-  enterApp();
-}
-
-async function enterApp() {
-  document.getElementById('loginScreen').style.display = 'none';
-  document.getElementById('app').style.display = 'flex';
-  syncInputs();
-  await fetchFromSupabase();
-  renderAll();
-  log('LOGIN', 'Entrada no sistema');
-}
-
-async function logout() {
-  if (supabaseClient) await supabaseClient.auth.signOut();
-  document.getElementById('app').style.display = 'none';
-  document.getElementById('loginScreen').style.display = 'grid';
-}
-
-async function fetchFromSupabase() {
-  if (!supabaseClient) return;
-  try {
-    // 1. Produtos
-    const { data: prod } = await supabaseClient.from('produtos').select('*');
-    if (prod && prod.length > 0) {
-      db.products = prod;
-    } else if (db.products && db.products.length > 0) {
-      await supabaseClient.from('produtos').upsert(db.products);
-    }
-
-    // 2. Vendas
-    const { data: vts } = await supabaseClient.from('vendas').select('*');
-    if (vts && vts.length > 0) {
-      db.sales = vts;
-    } else if (db.sales && db.sales.length > 0) {
-      await supabaseClient.from('vendas').upsert(db.sales);
-    }
-
-    // 3. Movimentações
-    const { data: movs } = await supabaseClient.from('movimentacoes').select('*');
-    if (movs && movs.length > 0) {
-      db.movements = movs;
-    } else if (db.movements && db.movements.length > 0) {
-      await supabaseClient.from('movimentacoes').upsert(db.movements);
-    }
-
-    // 4. Auditoria
-    const { data: aud } = await supabaseClient.from('auditoria').select('*');
-    if (aud && aud.length > 0) {
-      db.audit = aud;
-    }
-
-    save();
-    renderAll();
-    showToast('Sincronizado com o Supabase.');
-  } catch (e) { console.log('Sincronização em nuvem pendente:', e); }
-}
-
-function renderAll() {
-  renderDashboard();
-  renderProducts();
-  renderCart();
-  renderStock();
-  renderProduction();
-  renderFinance();
-  renderAudit();
-  renderUsers();
-  renderSalesHistory();
-}
-
-function renderDashboard() {
-  const d = today(), sales = db.sales.filter(s => !s.cancelled && String(s.date).slice(0, 10) === d), fat = sales.reduce((a, s) => a + s.total, 0), profit = sales.reduce((a, s) => a + (s.items ? s.items.reduce((z, i) => z + (i.price - i.cost) * i.qty, 0) : 0), 0), low = db.products.filter(p => p.qty <= p.min);
-  document.getElementById('kpiFaturamento').textContent = money(fat);
-  document.getElementById('kpiLucro').textContent = money(profit);
-  document.getElementById('kpiVendas').textContent = sales.length;
-  document.getElementById('kpiBaixo').textContent = low.length;
-
-  document.getElementById('stockAlerts').innerHTML = low.length ? low.map(p => `<div style="margin-bottom:10px"><b>${esc(p.name)}</b><span class="badge b-danger" style="float:right">${p.qty} un.</span><div class="bar"><span style="width:${Math.min(100, p.qty / Math.max(1, p.min) * 100)}%"></span></div></div>`).join('') : '<div class="empty">Nenhum alerta.</div>';
-  document.getElementById('recentSales').innerHTML = db.sales.filter(s => !s.cancelled).slice(0, 5).map(s => `<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border)"><span>#${s.number || ''}<small class="muted"> · ${s.payment || ''}</small></span><b>${money(s.total)}</b></div>`).join('') || '<div class="empty">Nenhuma venda.</div>';
-
-  const counts = {};
-  sales.forEach(s => (s.items || []).forEach(i => counts[i.name] = (counts[i.name] || 0) + i.qty));
-  const top = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 5);
-  document.getElementById('topProducts').innerHTML = top.length ? top.map((x) => `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)"><span>${esc(x[0])}</span><b>${x[1]} un.</b></div>`).join('') : '<div class="empty">Nenhum dado hoje.</div>';
-}
-
-function renderProducts() {
-  const q = document.getElementById('saleSearch').value.toLowerCase();
-  const el = document.getElementById('products');
-  const items = db.products.filter(p => p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q));
-  el.innerHTML = items.map(p => `
-    <div class="product ${p.qty <= 0 ? 'out' : ''}" onclick="addToCart('${p.id}')">
-      <span class="emoji">${p.emoji || '🍦'}</span>
-      <b>${esc(p.name)}</b>
-      <small>${p.qty} un. disponível</small>
-      <strong>${money(p.price)}</strong>
-    </div>
-  `).join('');
-}
-
-function addToCart(id) {
-  const p = db.products.find(x => x.id === id);
-  if (!p || p.qty <= 0) return showToast('Produto sem estoque!', true);
-  const inCart = cart.find(c => c.id === id);
-  if (inCart) {
-    if (inCart.qty + 1 > p.qty) return showToast('Estoque máximo atingido!', true);
-    inCart.qty++;
-  } else {
-    cart.push({ ...p, qty: 1 });
-  }
-  renderCart();
-}
-
-function renderCart() {
-  const el = document.getElementById('cart');
-  let sub = 0;
-  el.innerHTML = cart.map((item, idx) => {
-    sub += item.price * item.qty;
-    return `
-      <div class="cart-row">
-        <div><b>${esc(item.name)}</b><br><small>${money(item.price)}</small></div>
-        <div class="qty">
-          <button onclick="changeCartQty(${idx}, -1)">-</button>
-          <span>${item.qty}</span>
-          <button onclick="changeCartQty(${idx}, 1)">+</button>
-        </div>
-        <b>${money(item.price * item.qty)}</b>
-      </div>
-    `;
-  }).join('');
+  log('VENDA', `Venda #${num} confirmada no valor de ${money(tot)} (${pay})`);
+  showToast(`Venda #${num} finalizada com sucesso!`);
   
-  const desc = Number(document.getElementById('discount').value) || 0;
-  document.getElementById('cartCount').textContent = cart.reduce((a, b) => a + b.qty, 0) + ' itens';
-  document.getElementById('subtotal').textContent = money(sub);
-  document.getElementById('saleTotal').textContent = money(Math.max(0, sub - desc));
-}
-
-function changeCartQty(index, delta) {
-  const item = cart[index];
-  const p = db.products.find(x => x.id === item.id);
-  if (delta > 0 && item.qty + 1 > p.qty) return showToast('Estoque insuficiente!', true);
-  item.qty += delta;
-  if (item.qty <= 0) cart.splice(index, 1);
-  renderCart();
-}
-
-function openPayment() {
-  if (!cart.length) return showToast('O carrinho está vazio!', true);
-  const desc = Number(document.getElementById('discount').value) || 0;
-  const sub = cart.reduce((a, b) => a + (b.price * b.qty), 0);
-  const tot = Math.max(0, sub - desc);
-
-  document.getElementById('modalTitle').textContent = 'Finalizar Pagamento';
-  document.getElementById('modalBody').innerHTML = `
-    <h3>Total: ${money(tot)}</h3>
-    <div class="field" style="margin-top:12px">
-      <label>FORMA DE PAGAMENTO</label>
-      <select id="payMethod" class="input">
-        <option value="Dinheiro">Dinheiro</option>
-        <option value="Pix">Pix</option>
-        <option value="Cartão de Crédito">Cartão de Crédito</option>
-        <option value="Cartão de Débito">Cartão de Débito</option>
-      </select>
-    </div>
-    <button class="btn btn-success btn-block" style="margin-top:16px" onclick="confirmSale(${tot})">Confirmar Venda</button>
-  `;
-  document.getElementById('modal').classList.add('show');
-}
-
-function closeModal() { document.getElementById('modal').classList.remove('show'); }
-
-async function confirmSale(tot) {
-  const pay = document.getElementById('payMethod').value;
-  const num = (db.sales.length + 1).toString().padStart(4, '0');
-  
-  // Abater estoque
-  cart.forEach(c => {
-    const p = db.products.find(x => x.id === c.id);
-    if (p) p.qty -= c.qty;
-  });
-
-  const saleData = {
-    id: uid(),
-    number: num,
-    date: now(),
-    items: [...cart],
-    total: tot,
-    payment: pay,
-    user: currentUser.name,
-    cancelled: false
-  };
-
-  db.sales.unshift(saleData);
-  save();
-
-  if (supabaseClient) {
-    await supabaseClient.from('vendas').insert([saleData]);
-    await supabaseClient.from('produtos').upsert(db.products);
-  }
-
-  log('VENDA', `Venda #${num} de ${money(tot)} via ${pay}`);
-  showToast('Venda concluída!');
   cart = [];
   document.getElementById('discount').value = 0;
   closeModal();
   renderAll();
 }
 
+function renderSalesHistory() {
+  const q = document.getElementById('historySearch').value.toLowerCase();
+  const list = db.sales.filter(s => 
+    (s.number && s.number.toLowerCase().includes(q)) || 
+    (s.payment && s.payment.toLowerCase().includes(q))
+  );
+
+  document.getElementById('salesHistory').innerHTML = list.map(s => `
+    <tr>
+      <td><b>#${s.number || ''}</b></td>
+      <td>${new Date(s.date).toLocaleString('pt-BR')}</td>
+      <td>${s.items ? s.items.reduce((a, b) => a + b.qty, 0) : 0} itens</td>
+      <td><span class="badge b-info">${esc(s.payment)}</span></td>
+      <td><b>${money(s.total)}</b></td>
+      <td>
+        ${s.cancelled 
+          ? '<span class="badge b-danger">Cancelada</span>' 
+          : `<span class="badge b-ok">Concluída</span> <button class="btn btn-danger btn-small" onclick="cancelSale('${s.id}')">Cancelar</button>`
+        }
+      </td>
+    </tr>
+  `).join('') || '<tr><td colspan="6" class="empty">Nenhuma venda encontrada.</td></tr>';
+}
+
+async function cancelSale(id) {
+  if (!confirm('Deseja realmente cancelar esta venda? O estoque será devolvido.')) return;
+  const sale = db.sales.find(s => s.id === id);
+  if (!sale || sale.cancelled) return;
+
+  sale.cancelled = true;
+  (sale.items || []).forEach(item => {
+    const p = db.products.find(x => x.id === item.id);
+    if (p) p.qty += item.qty;
+  });
+
+  save();
+
+  if (supabaseClient) {
+    await supabaseClient.from('vendas').upsert([sale]);
+    await supabaseClient.from('produtos').upsert(db.products);
+  }
+
+  log('CANCELAMENTO', `Venda #${sale.number} cancelada`);
+  showToast(`Venda #${sale.number} cancelada.`, true);
+  renderAll();
+}
+
+/* ============================================================
+   ESTOQUE & PRODUTOS
+============================================================ */
 function renderStock() {
   const q = document.getElementById('stockSearch').value.toLowerCase();
-  const el = document.getElementById('stockTable');
-  const items = db.products.filter(p => p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q));
+  const list = db.products.filter(p => p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q));
 
-  el.innerHTML = items.map(p => `
+  document.getElementById('stockTable').innerHTML = list.map(p => `
     <tr>
-      <td>${p.emoji || '🍦'}</td>
+      <td style="font-size:18px">${p.emoji || '🍦'}</td>
       <td><b>${esc(p.name)}</b></td>
       <td>${esc(p.category)}</td>
-      <td>${money(p.price)}</td>
+      <td><b>${money(p.price)}</b></td>
       <td>${money(p.cost)}</td>
-      <td><span class="badge ${p.qty <= p.min ? 'b-danger' : 'b-ok'}">${p.qty} un.</span></td>
+      <td>
+        <span class="badge ${p.qty <= p.min ? 'b-danger' : 'b-ok'}">${p.qty} un.</span>
+      </td>
       <td>${p.min} un.</td>
       <td>
-        <button class="btn btn-secondary btn-small" onclick="openProductModal('${p.id}')"><i class="fa-solid fa-pen"></i></button>
+        <button class="btn btn-secondary btn-small" onclick="openProductModal('${p.id}')"><i class="fa-solid fa-pen"></i> Editar</button>
         <button class="btn btn-danger btn-small" onclick="deleteProduct('${p.id}')"><i class="fa-solid fa-trash"></i></button>
       </td>
     </tr>
-  `).join('');
+  `).join('') || '<tr><td colspan="8" class="empty">Nenhum produto cadastrado.</td></tr>';
 }
 
 function openProductModal(id = null) {
-  const p = db.products.find(x => x.id === id) || { name: '', category: '', price: 0, cost: 0, qty: 0, min: 5, emoji: '🍦' };
+  const p = db.products.find(x => x.id === id) || { name: '', category: 'Frutas', price: '', cost: '', qty: 0, min: 5, emoji: '🍦' };
+  
   document.getElementById('modalTitle').textContent = id ? 'Editar Produto' : 'Novo Produto';
   document.getElementById('modalBody').innerHTML = `
     <div class="form-grid">
-      <div class="field"><label>NOME</label><input id="pName" class="input" value="${esc(p.name)}"></div>
-      <div class="field"><label>EMOJI</label><input id="pEmoji" class="input" value="${p.emoji}"></div>
+      <div class="field"><label>EMOJI</label><input id="pEmoji" class="input" value="${esc(p.emoji)}"></div>
+      <div class="field"><label>NOME DO PRODUTO</label><input id="pName" class="input" value="${esc(p.name)}"></div>
       <div class="field"><label>CATEGORIA</label><input id="pCat" class="input" value="${esc(p.category)}"></div>
-      <div class="field"><label>PREÇO DE VENDA</label><input id="pPrice" class="input" type="number" step=".01" value="${p.price}"></div>
-      <div class="field"><label>CUSTO</label><input id="pCost" class="input" type="number" step=".01" value="${p.cost}"></div>
+      <div class="field"><label>PREÇO DE VENDA (R$)</label><input id="pPrice" class="input" type="number" step=".01" value="${p.price}"></div>
+      <div class="field"><label>CUSTO (R$)</label><input id="pCost" class="input" type="number" step=".01" value="${p.cost}"></div>
       <div class="field"><label>QUANTIDADE</label><input id="pQty" class="input" type="number" value="${p.qty}"></div>
       <div class="field"><label>ESTOQUE MÍNIMO</label><input id="pMin" class="input" type="number" value="${p.min}"></div>
     </div>
@@ -508,127 +103,109 @@ function openProductModal(id = null) {
 }
 
 async function saveProduct(id) {
+  const emoji = document.getElementById('pEmoji').value.trim() || '🍦';
   const name = document.getElementById('pName').value.trim();
-  if (!name) return showToast('Nome é obrigatório', true);
+  const category = document.getElementById('pCat').value.trim() || 'Geral';
+  const price = Number(document.getElementById('pPrice').value) || 0;
+  const cost = Number(document.getElementById('pCost').value) || 0;
+  const qty = Number(document.getElementById('pQty').value) || 0;
+  const min = Number(document.getElementById('pMin').value) || 0;
 
-  const productData = {
-    id: id || uid(),
-    name: name,
-    emoji: document.getElementById('pEmoji').value || '🍦',
-    category: document.getElementById('pCat').value || 'Geral',
-    price: Number(document.getElementById('pPrice').value) || 0,
-    cost: Number(document.getElementById('pCost').value) || 0,
-    qty: Number(document.getElementById('pQty').value) || 0,
-    min: Number(document.getElementById('pMin').value) || 0
-  };
+  if (!name || price <= 0) return showToast('Preencha o nome e um preço válido.', true);
 
+  let pData;
   if (id) {
-    const idx = db.products.findIndex(x => x.id === id);
-    if (idx !== -1) db.products[idx] = productData;
+    pData = db.products.find(x => x.id === id);
+    if (pData) Object.assign(pData, { emoji, name, category, price, cost, qty, min });
   } else {
-    db.products.push(productData);
+    pData = { id: uid(), emoji, name, category, price, cost, qty, min };
+    db.products.push(pData);
   }
 
   save();
-  if (supabaseClient) {
-    await supabaseClient.from('produtos').upsert([productData]);
-  }
+  if (supabaseClient) await supabaseClient.from('produtos').upsert([pData]);
 
+  log('PRODUTO', `Produto "${name}" ${id ? 'atualizado' : 'criado'}`);
+  showToast('Produto salvo com sucesso!');
   closeModal();
   renderAll();
-  showToast('Produto salvo com sucesso!');
 }
 
 async function deleteProduct(id) {
-  if (!confirm('Deseja excluir este produto?')) return;
+  if (!confirm('Excluir este produto?')) return;
+  const p = db.products.find(x => x.id === id);
   db.products = db.products.filter(x => x.id !== id);
   save();
-  if (supabaseClient) {
-    await supabaseClient.from('produtos').delete().eq('id', id);
-  }
+
+  if (supabaseClient) await supabaseClient.from('produtos').delete().eq('id', id);
+
+  log('PRODUTO', `Produto "${p?.name || id}" excluído`);
+  showToast('Produto excluído.');
   renderAll();
-  showToast('Produto removido.');
 }
 
+/* ============================================================
+   PRODUÇÃO & DEMAIS ABAS
+============================================================ */
 function renderProduction() {
   const sel = document.getElementById('prodProduct');
   if (!sel) return;
-  sel.innerHTML = db.products.map(p => `<option value="${p.id}">${esc(p.name)}</option>`).join('');
+  sel.innerHTML = db.products.map(p => `<option value="${p.id}">${esc(p.name)} (${p.qty} em estoque)</option>`).join('');
 }
 
 async function registerProduction() {
-  const pid = document.getElementById('prodProduct').value;
+  const id = document.getElementById('prodProduct').value;
   const qty = Number(document.getElementById('prodQty').value) || 0;
-  const p = db.products.find(x => x.id === pid);
-  if (!p || qty <= 0) return showToast('Entrada inválida', true);
+  const p = db.products.find(x => x.id === id);
+
+  if (!p || qty <= 0) return showToast('Selecione um produto e uma quantidade válida.', true);
 
   p.qty += qty;
-  save();
+  const prodRecord = { id: uid(), product_id: id, name: p.name, qty, date: now(), user: currentUser.name };
+  db.productions.unshift(prodRecord);
 
+  save();
   if (supabaseClient) {
     await supabaseClient.from('produtos').upsert([p]);
+    await supabaseClient.from('producao').insert([prodRecord]);
   }
 
-  log('PRODUÇÃO', `Adicionado ${qty} un. ao produto ${p.name}`);
-  showToast('Produção registrada!');
+  log('PRODUÇÃO', `Adicionado ${qty} un. ao estoque de "${p.name}"`);
+  showToast(`Produção registrada! +${qty} un. de ${p.name}`);
   renderAll();
 }
 
 function renderFinance() {
-  const el = document.getElementById('financeTable');
-  if (!el) return;
-  el.innerHTML = db.movements.map(m => `
+  document.getElementById('financeTable').innerHTML = db.movements.map(m => `
     <tr>
       <td>${new Date(m.date).toLocaleString('pt-BR')}</td>
-      <td><span class="badge ${m.type === 'entrada' ? 'b-ok' : 'b-danger'}">${m.type}</span></td>
-      <td>${esc(m.desc)}</td>
-      <td>${money(m.val)}</td>
+      <td><span class="badge ${m.type === 'Entrada' ? 'b-ok' : 'b-danger'}">${esc(m.type)}</span></td>
+      <td>${esc(m.description)}</td>
+      <td><b>${money(m.amount)}</b></td>
       <td>${esc(m.user)}</td>
     </tr>
-  `).join('');
+  `).join('') || '<tr><td colspan="5" class="empty">Nenhuma movimentação registrada.</td></tr>';
 }
 
 function renderAudit() {
-  const el = document.getElementById('auditTable');
-  if (!el) return;
-  el.innerHTML = db.audit.map(a => `
+  document.getElementById('auditTable').innerHTML = db.audit.map(a => `
     <tr>
       <td>${new Date(a.at).toLocaleString('pt-BR')}</td>
       <td><b>${esc(a.user)}</b></td>
       <td><span class="badge b-info">${esc(a.action)}</span></td>
       <td>${esc(a.details)}</td>
     </tr>
-  `).join('');
+  `).join('') || '<tr><td colspan="4" class="empty">Sem registros de auditoria.</td></tr>';
 }
 
 function renderUsers() {
-  const el = document.getElementById('usersTable');
-  if (!el) return;
-  el.innerHTML = db.users.map(u => `
+  document.getElementById('usersTable').innerHTML = db.users.map(u => `
     <tr>
       <td><b>${esc(u.name)}</b></td>
       <td>${esc(u.email)}</td>
-      <td><span class="badge b-info">${esc(u.role)}</span></td>
+      <td><span class="badge b-warn">${esc(u.role)}</span></td>
     </tr>
-  `).join('');
-}
-
-function renderSalesHistory() {
-  const el = document.getElementById('salesHistory');
-  if (!el) return;
-  const q = (document.getElementById('historySearch')?.value || '').toLowerCase();
-  const sales = db.sales.filter(s => s.number?.toLowerCase().includes(q) || s.payment?.toLowerCase().includes(q));
-
-  el.innerHTML = sales.map(s => `
-    <tr>
-      <td>#${s.number || ''}</td>
-      <td>${new Date(s.date).toLocaleString('pt-BR')}</td>
-      <td>${s.items ? s.items.length : 0} itens</td>
-      <td>${esc(s.payment)}</td>
-      <td><b>${money(s.total)}</b></td>
-      <td><span class="badge ${s.cancelled ? 'b-danger' : 'b-ok'}">${s.cancelled ? 'Cancelada' : 'Concluída'}</span></td>
-    </tr>
-  `).join('');
+  `).join('') || '<tr><td colspan="3" class="empty">Nenhum usuário cadastrado.</td></tr>';
 }
 
 function saveConfig() {
@@ -640,20 +217,21 @@ function saveConfig() {
 }
 
 function saveSupabase() {
-  const u = document.getElementById('sbUrl').value.trim();
-  const k = document.getElementById('sbKey').value.trim();
-  localStorage.setItem('sb_url', u);
-  localStorage.setItem('sb_key', k);
-  SUPABASE_URL = u;
-  SUPABASE_KEY = k;
-  if (u && k) {
-    try {
-      supabaseClient = supabase.createClient(u, k);
-      showToast('Nuvem reconectada!');
+  const url = document.getElementById('sbUrl').value.trim();
+  const key = document.getElementById('sbKey').value.trim();
+  localStorage.setItem('sb_url', url);
+  localStorage.setItem('sb_key', key);
+  SUPABASE_URL = url;
+  SUPABASE_KEY = key;
+
+  try {
+    if (url && key) {
+      supabaseClient = supabase.createClient(url, key);
+      showToast('Nuvem Supabase configurada com sucesso!');
       fetchFromSupabase();
-    } catch (e) {
-      showToast('Erro ao inicializar Supabase', true);
     }
+  } catch (e) {
+    showToast('Erro ao inicializar Supabase.', true);
   }
 }
 </script>
