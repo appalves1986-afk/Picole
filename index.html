@@ -35,6 +35,12 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}a{text-decoratio
 .toast-wrap{position:fixed;right:20px;bottom:20px;z-index:200;display:flex;flex-direction:column;gap:8px}.toast{background:var(--dark);color:#fff;padding:12px 15px;border-radius:10px;box-shadow:var(--shadow);border-left:4px solid var(--ok);max-width:360px}.toast.error{border-color:var(--danger)}
 .login{min-height:100vh;display:grid;place-items:center;background:radial-gradient(circle at 20% 20%,#312e81,transparent 35%),linear-gradient(135deg,#0f172a,#312e81);padding:20px}.login-box{width:min(430px,100%);background:#fff;border-radius:22px;padding:28px;box-shadow:0 30px 80px rgba(0,0,0,.3)}.login-brand{text-align:center;margin-bottom:24px}.login-brand .brand-icon{margin:auto;color:#fff}.login-brand h1{margin:10px 0 4px;color:#111827}.login-brand p{margin:0;color:#64748b;font-size:13px}
 .mobile-menu{display:none}
+@media print{body *{visibility:hidden}#receiptPrint,#receiptPrint *{visibility:visible}#receiptPrint{position:absolute;left:0;top:0;width:100%;color:#000}}
+.receipt{width:300px;margin:auto;padding:10px;font-family:monospace;font-size:12px;background:#fff;color:#000;border:1px solid #ddd;border-radius:6px}
+.receipt h3,.receipt p{text-align:center;margin:4px 0}
+.receipt table{width:100%;border-collapse:collapse;margin:10px 0}
+.receipt th,.receipt td{padding:4px 0;border-bottom:1px dashed #ccc;text-align:left;font-size:11px}
+.receipt-total{font-size:14px;font-weight:bold;text-align:right;margin-top:8px}
 @media(max-width:1050px){.g4{grid-template-columns:repeat(2,1fr)}.sales-grid{grid-template-columns:1fr}.sidebar{transform:translateX(-100%);transition:.2s}.sidebar.open{transform:none}.main{margin-left:0;width:100%}.mobile-menu{display:grid}}
 @media(max-width:700px){.content{padding:12px}.topbar{padding:0 12px}.g3,.g2,.g4{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}.products{grid-template-columns:repeat(2,1fr)}.topbar h2{font-size:15px}}
 </style>
@@ -97,12 +103,16 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}a{text-decoratio
       </div>
 
       <div class="page" id="page-vendas">
-        <div id="cashStatus"></div>
+        <div class="card" style="margin-bottom:18px">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px" id="cashBanner"></div>
+        </div>
+
         <div class="grid sales-grid">
           <div class="card"><div class="card-head"><h3>Nova venda</h3><div class="toolbar"><input id="saleSearch" class="input" placeholder="Buscar produto..." oninput="renderProducts()"></div></div><div id="products" class="products"></div></div>
           <div class="card"><div class="card-head"><h3>Carrinho</h3><span id="cartCount" class="badge b-info">0 itens</span></div><div id="cart" class="cart-list"></div><div class="totals"><div class="total-line"><span>Subtotal</span><b id="subtotal">R$ 0,00</b></div><div class="field"><label>DESCONTO (R$)</label><input id="discount" class="input" type="number" min="0" step=".01" value="0" oninput="renderCart()"></div><div class="total-line" style="margin-top:12px"><span>Total</span><b class="total-final" id="saleTotal">R$ 0,00</b></div><button class="btn btn-success btn-block" style="margin-top:12px" onclick="openPayment()"><i class="fa-solid fa-check"></i> Finalizar venda</button></div></div>
         </div>
-        <div class="card" style="margin-top:18px"><div class="card-head"><h3>Histórico de vendas</h3><div class="toolbar"><input id="historySearch" class="input" placeholder="Buscar por número ou pagamento..." oninput="renderSalesHistory()"></div></div><div class="table-wrap"><table><thead><tr><th>Nº</th><th>Data</th><th>Itens</th><th>Pagamento</th><th>Total</th><th>Status</th></tr></thead><tbody id="salesHistory"></tbody></table></div></div>
+
+        <div class="card" style="margin-top:18px"><div class="card-head"><h3>Histórico de vendas</h3><div class="toolbar"><input id="historySearch" class="input" placeholder="Buscar por número ou pagamento..." oninput="renderSalesHistory()"></div></div><div class="table-wrap"><table><thead><tr><th>Nº</th><th>Data</th><th>Itens</th><th>Pagamento</th><th>Total</th><th>Status</th><th>Ações</th></tr></thead><tbody id="salesHistory"></tbody></table></div></div>
       </div>
 
       <div class="page" id="page-estoque">
@@ -139,18 +149,25 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}a{text-decoratio
   </main>
 </div>
 
+<div id="receiptPrint" style="display:none"></div>
 <div class="modal" id="modal"><div class="modal-box"><div class="modal-head"><h3 id="modalTitle">Modal</h3><button class="close" onclick="closeModal()">×</button></div><div id="modalBody"></div></div></div>
 <div class="toast-wrap" id="toasts"></div>
 
 <script>
-/* ============================================================
-    PICOLÉS PRO V2 - SUPABASE FULL CONECTADO & SINCRONIZADO
-============================================================ */
-let SUPABASE_URL = localStorage.getItem('sb_url') || 'https://iaamdwnjhrzynmxytshe.supabase.co';
-let SUPABASE_KEY = localStorage.getItem('sb_key') || 'sb_publishable_TdPMJXO02koPQ75j2fCs9A_kGcIQOaj';
+let SUPABASE_URL = localStorage.getItem('sb_url') || '';
+let SUPABASE_KEY = localStorage.getItem('sb_key') || '';
 
 const LS = 'picoles_pro_v2';
-let db = { products: [], sales: [], productions: [], movements: [], audit: [], users: [], cash: { open: false, opening: 0, openedAt: null }, config: { company: 'Picolés Pro', cnpj: '', receipt: 'Obrigado pela preferência!' } };
+let db = { 
+  products: [], 
+  sales: [], 
+  productions: [], 
+  movements: [], 
+  audit: [], 
+  users: [], 
+  cash: { open: false, opening: 0, openedAt: null }, 
+  config: { company: 'Picolés Pro', cnpj: '12.345.678/0001-90', receipt: 'Obrigado pela preferência!' } 
+};
 let cart = [], currentUser = { id: 'local-admin', name: 'Administrador', email: 'admin@local', role: 'Administrador' };
 
 const money = n => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(n) || 0);
@@ -198,7 +215,7 @@ function seed() {
     { id: uid(), name: 'Picolé de Coco', category: 'Cremoso', price: 5, cost: 2, qty: 8, min: 10, emoji: '🥥' }
   ];
   db.users = [{ id: 'local-admin', name: 'Administrador', email: 'admin@local', role: 'Administrador', active: true }];
-  db.config = { company: 'Picolés Pro', cnpj: '', receipt: 'Obrigado pela preferência!' };
+  db.config = { company: 'Picolés Pro', cnpj: '12.345.678/0001-90', receipt: 'Obrigado pela preferência!' };
   save();
 }
 
@@ -251,7 +268,7 @@ function login() {
     });
   } else {
     if (!e || !p) return showToast('Informe e-mail e senha.', true);
-    if (e === 'admin@local' && p === 'Lara@2310') {
+    if (e === 'admin@local' && p === 'admin') {
       currentUser = { id: 'local-admin', name: 'Administrador', email: e, role: 'Administrador' };
       enterApp();
     } else showToast('E-mail ou senha incorretos.', true);
@@ -300,6 +317,7 @@ async function fetchFromSupabase() {
 }
 
 function renderAll() {
+  renderCashBanner();
   renderDashboard();
   renderProducts();
   renderCart();
@@ -311,283 +329,354 @@ function renderAll() {
   renderSalesHistory();
 }
 
+function renderCashBanner() {
+  const el = document.getElementById('cashBanner');
+  if (!db.cash.open) {
+    el.innerHTML = `
+      <div style="display:flex;align-items:center;gap:12px">
+        <span class="badge b-danger" style="padding:8px 12px;font-size:13px"><i class="fa-solid fa-lock"></i> CAIXA FECHADO</span>
+        <span class="muted">Abra o caixa para iniciar as vendas do dia.</span>
+      </div>
+      <button class="btn btn-primary" onclick="openCashModal('ABRIR')"><i class="fa-solid fa-key"></i> Abrir Caixa</button>
+    `;
+  } else {
+    const salesToday = db.sales.filter(s => !s.cancelled && s.date >= db.cash.openedAt).reduce((a, b) => a + b.total, 0);
+    const movsToday = db.movements.filter(m => m.date >= db.cash.openedAt).reduce((a, m) => a + (m.type === 'ENTRADA' ? m.val : -m.val), 0);
+    const totalCash = (db.cash.opening || 0) + salesToday + movsToday;
+
+    el.innerHTML = `
+      <div style="display:flex;align-items:center;gap:12px">
+        <span class="badge b-ok" style="padding:8px 12px;font-size:13px"><i class="fa-solid fa-lock-open"></i> CAIXA ABERTO</span>
+        <span>Aberto às: <b>${new Date(db.cash.openedAt).toLocaleTimeString('pt-BR')}</b> | Valor Inicial: <b>${money(db.cash.opening)}</b> | Em Caixa: <b style="color:var(--ok)">${money(totalCash)}</b></span>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-secondary btn-small" onclick="openCashModal('SANGRIA')"><i class="fa-solid fa-minus"></i> Sangria/Suprimento</button>
+        <button class="btn btn-danger btn-small" onclick="openCashModal('FECHAR')"><i class="fa-solid fa-door-closed"></i> Fechar Caixa</button>
+      </div>
+    `;
+  }
+}
+
+function openCashModal(type) {
+  document.getElementById('modalTitle').textContent = type === 'ABRIR' ? 'Abrir Caixa' : (type === 'FECHAR' ? 'Fechar Caixa' : 'Movimentação Manual');
+  if (type === 'ABRIR') {
+    document.getElementById('modalBody').innerHTML = `
+      <div class="field"><label>VALOR INICIAL EM CAIXA (TROCO)</label><input id="cashAmount" class="input" type="number" step=".01" value="0.00"></div>
+      <button class="btn btn-success btn-block" style="margin-top:16px" onclick="confirmOpenCash()">Confirmar Abertura</button>
+    `;
+  } else if (type === 'FECHAR') {
+    const totalSales = db.sales.filter(s => !s.cancelled && s.date >= db.cash.openedAt).reduce((a, b) => a + b.total, 0);
+    const totalCash = (db.cash.opening || 0) + totalSales + db.movements.filter(m => m.date >= db.cash.openedAt).reduce((a, m) => a + (m.type === 'ENTRADA' ? m.val : -m.val), 0);
+    
+    document.getElementById('modalBody').innerHTML = `
+      <p><b>Resumo do Turno:</b></p>
+      <ul>
+        <li>Abertura: ${money(db.cash.opening)}</li>
+        <li>Vendas Realizadas: ${money(totalSales)}</li>
+        <li>Saldo Final Calculado: <b>${money(totalCash)}</b></li>
+      </ul>
+      <button class="btn btn-danger btn-block" style="margin-top:16px" onclick="confirmCloseCash()">Confirmar Fechamento de Caixa</button>
+    `;
+  } else if (type === 'SANGRIA') {
+    document.getElementById('modalBody').innerHTML = `
+      <div class="field"><label>TIPO DE OPERAÇÃO</label><select id="movType" class="input"><option value="SAIDA">Sangria (Retirada)</option><option value="ENTRADA">Suprimento (Entrada)</option></select></div>
+      <div class="field" style="margin-top:10px"><label>VALOR (R$)</label><input id="movVal" class="input" type="number" step=".01" value="0.00"></div>
+      <div class="field" style="margin-top:10px"><label>MOTIVO / DESCRIÇÃO</label><input id="movDesc" class="input" placeholder="Ex: Pagamento de fornecedor"></div>
+      <button class="btn btn-primary btn-block" style="margin-top:16px" onclick="confirmCashMovement()">Registrar Movimentação</button>
+    `;
+  }
+  document.getElementById('modal').classList.add('show');
+}
+
+function confirmOpenCash() {
+  const val = Number(document.getElementById('cashAmount').value) || 0;
+  db.cash = { open: true, opening: val, openedAt: now() };
+  
+  db.movements.unshift({
+    id: uid(),
+    date: now(),
+    type: 'ENTRADA',
+    desc: 'Abertura de Caixa (Troco Inicial)',
+    val: val,
+    user: currentUser.name
+  });
+
+  log('CAIXA', `Caixa aberto com ${money(val)}`);
+  save();
+  closeModal();
+  renderAll();
+  showToast('Caixa aberto com sucesso!');
+}
+
+function confirmCloseCash() {
+  log('CAIXA', 'Caixa Fechado');
+  db.cash = { open: false, opening: 0, openedAt: null };
+  save();
+  closeModal();
+  renderAll();
+  showToast('Caixa fechado com sucesso.');
+}
+
+function confirmCashMovement() {
+  const type = document.getElementById('movType').value;
+  const val = Number(document.getElementById('movVal').value) || 0;
+  const desc = document.getElementById('movDesc').value.trim() || 'Movimentação manual';
+
+  if (val <= 0) return showToast('Informe um valor válido!', true);
+
+  db.movements.unshift({
+    id: uid(),
+    date: now(),
+    type: type,
+    desc: `${type === 'SAIDA' ? 'Sangria' : 'Suprimento'}: ${desc}`,
+    val: val,
+    user: currentUser.name
+  });
+
+  log('FINANCEIRO', `${type === 'SAIDA' ? 'Sangria' : 'Suprimento'} de ${money(val)} - ${desc}`);
+  save();
+  closeModal();
+  renderAll();
+  showToast('Movimentação registrada com sucesso!');
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('show');
+}
+
 function renderDashboard() {
-  const d = today(), sales = db.sales.filter(s => !s.cancelled && String(s.date).slice(0, 10) === d), fat = sales.reduce((a, s) => a + s.total, 0), profit = sales.reduce((a, s) => a + (s.items ? s.items.reduce((z, i) => z + (i.price - i.cost) * i.qty, 0) : 0), 0), low = db.products.filter(p => p.qty <= p.min);
+  const todayStr = today();
+  const salesToday = db.sales.filter(s => !s.cancelled && s.date.startsWith(todayStr));
+  const fat = salesToday.reduce((a, b) => a + b.total, 0);
+  const lowStock = db.products.filter(p => p.qty <= p.min).length;
+
   document.getElementById('kpiFaturamento').textContent = money(fat);
-  document.getElementById('kpiLucro').textContent = money(profit);
-  document.getElementById('kpiVendas').textContent = sales.length;
-  document.getElementById('kpiBaixo').textContent = low.length;
-
-  document.getElementById('stockAlerts').innerHTML = low.length ? low.map(p => `<div style="margin-bottom:10px"><b>${esc(p.name)}</b><span class="badge b-danger" style="float:right">${p.qty} un.</span><div class="bar"><span style="width:${Math.min(100, p.qty / Math.max(1, p.min) * 100)}%"></span></div></div>`).join('') : '<div class="empty">Nenhum alerta.</div>';
-  document.getElementById('recentSales').innerHTML = db.sales.filter(s => !s.cancelled).slice(0, 5).map(s => `<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border)"><span>#${s.number || ''}<small class="muted"> · ${s.payment || ''}</small></span><b>${money(s.total)}</b></div>`).join('') || '<div class="empty">Nenhuma venda.</div>';
-
-  const counts = {};
-  sales.forEach(s => (s.items || []).forEach(i => counts[i.name] = (counts[i.name] || 0) + i.qty));
-  const top = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 5);
-  document.getElementById('topProducts').innerHTML = top.length ? top.map((x) => `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)"><span>${esc(x[0])}</span><b>${x[1]} un.</b></div>`).join('') : '<div class="empty">Nenhum dado hoje.</div>';
+  document.getElementById('kpiVendas').textContent = salesToday.length;
+  document.getElementById('kpiBaixo').textContent = lowStock;
 }
 
 function renderProducts() {
-  const q = document.getElementById('saleSearch').value.toLowerCase();
-  const el = document.getElementById('products');
-  const items = db.products.filter(p => p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q));
-  el.innerHTML = items.map(p => `
-    <div class="product ${p.qty <= 0 ? 'out' : ''}" onclick="addToCart('${p.id}')">
-      <span class="emoji">${p.emoji || '🍦'}</span>
-      <b>${esc(p.name)}</b>
-      <small>${p.qty} un. disponível</small>
-      <strong>${money(p.price)}</strong>
-    </div>
-  `).join('');
+  const container = document.getElementById('products');
+  if (!container) return;
+  const search = (document.getElementById('saleSearch')?.value || '').toLowerCase();
+  
+  container.innerHTML = db.products
+    .filter(p => p.name.toLowerCase().includes(search))
+    .map(p => `
+      <div class="product ${p.qty <= 0 ? 'out' : ''}" onclick="addToCart('${p.id}')">
+        <span class="emoji">${p.emoji || '🍦'}</span>
+        <b>${esc(p.name)}</b>
+        <small>Qtd: ${p.qty}</small>
+        <strong>${money(p.price)}</strong>
+      </div>
+    `).join('');
 }
 
-function addToCart(id) {
-  const p = db.products.find(x => x.id === id);
-  if (!p || p.qty <= 0) return showToast('Produto sem estoque!', true);
-  const inCart = cart.find(c => c.id === id);
-  if (inCart) {
-    if (inCart.qty + 1 > p.qty) return showToast('Estoque máximo atingido!', true);
-    inCart.qty++;
+function addToCart(productId) {
+  if (!db.cash.open) return showToast('Abra o caixa antes de realizar vendas!', true);
+  const prod = db.products.find(p => p.id === productId);
+  if (!prod || prod.qty <= 0) return showToast('Produto indisponível em estoque.', true);
+
+  const cartItem = cart.find(c => c.id === productId);
+  if (cartItem) {
+    if (cartItem.qty + 1 > prod.qty) return showToast('Estoque insuficiente.', true);
+    cartItem.qty++;
   } else {
-    cart.push({ ...p, qty: 1 });
+    cart.push({ id: prod.id, name: prod.name, price: prod.price, qty: 1 });
   }
   renderCart();
 }
 
 function renderCart() {
-  const el = document.getElementById('cart');
-  let sub = 0;
-  el.innerHTML = cart.map((item, idx) => {
-    sub += item.price * item.qty;
-    return `
-      <div class="cart-row">
-        <div><b>${esc(item.name)}</b><br><small>${money(item.price)}</small></div>
-        <div class="qty">
-          <button onclick="changeCartQty(${idx}, -1)">-</button>
-          <span>${item.qty}</span>
-          <button onclick="changeCartQty(${idx}, 1)">+</button>
-        </div>
-        <b>${money(item.price * item.qty)}</b>
+  const cartContainer = document.getElementById('cart');
+  if (!cartContainer) return;
+
+  cartContainer.innerHTML = cart.map(item => `
+    <div class="cart-row">
+      <div><b>${esc(item.name)}</b><br><small>${money(item.price)} un</small></div>
+      <div class="qty">
+        <button onclick="changeCartQty('${item.id}', -1)">-</button>
+        <span>${item.qty}</span>
+        <button onclick="changeCartQty('${item.id}', 1)">+</button>
       </div>
-    `;
-  }).join('');
-  
-  const desc = Number(document.getElementById('discount').value) || 0;
-  document.getElementById('cartCount').textContent = cart.reduce((a, b) => a + b.qty, 0) + ' itens';
-  document.getElementById('subtotal').textContent = money(sub);
-  document.getElementById('saleTotal').textContent = money(Math.max(0, sub - desc));
+      <div><b>${money(item.price * item.qty)}</b></div>
+    </div>
+  `).join('');
+
+  const subtotal = cart.reduce((a, b) => a + (b.price * b.qty), 0);
+  const discount = Number(document.getElementById('discount')?.value) || 0;
+  const total = Math.max(0, subtotal - discount);
+
+  document.getElementById('subtotal').textContent = money(subtotal);
+  document.getElementById('saleTotal').textContent = money(total);
+  document.getElementById('cartCount').textContent = `${cart.reduce((a, b) => a + b.qty, 0)} itens`;
 }
 
-function changeCartQty(index, delta) {
-  const item = cart[index];
-  const p = db.products.find(x => x.id === item.id);
-  if (delta > 0 && item.qty + 1 > p.qty) return showToast('Estoque insuficiente!', true);
+function changeCartQty(id, delta) {
+  const item = cart.find(c => c.id === id);
+  if (!item) return;
+  
   item.qty += delta;
-  if (item.qty <= 0) cart.splice(index, 1);
+  if (item.qty <= 0) {
+    cart = cart.filter(c => c.id !== id);
+  }
   renderCart();
 }
 
 function openPayment() {
-  if (!cart.length) return showToast('O carrinho está vazio!', true);
-  const desc = Number(document.getElementById('discount').value) || 0;
-  const sub = cart.reduce((a, b) => a + (b.price * b.qty), 0);
-  const tot = Math.max(0, sub - desc);
+  if (cart.length === 0) return showToast('O carrinho está vazio!', true);
+  const subtotal = cart.reduce((a, b) => a + (b.price * b.qty), 0);
+  const discount = Number(document.getElementById('discount')?.value) || 0;
+  const total = Math.max(0, subtotal - discount);
 
   document.getElementById('modalTitle').textContent = 'Finalizar Pagamento';
   document.getElementById('modalBody').innerHTML = `
-    <h3>Total: ${money(tot)}</h3>
-    <div class="field" style="margin-top:12px">
+    <h3>Total a Pagar: ${money(total)}</h3>
+    <div class="field" style="margin-top:10px">
       <label>FORMA DE PAGAMENTO</label>
       <select id="payMethod" class="input">
-        <option value="Dinheiro">Dinheiro</option>
-        <option value="Pix">Pix</option>
-        <option value="Cartão de Crédito">Cartão de Crédito</option>
-        <option value="Cartão de Débito">Cartão de Débito</option>
+        <option value="DINHEIRO">Dinheiro</option>
+        <option value="PIX">PIX</option>
+        <option value="CARTAO_DEBITO">Cartão de Débito</option>
+        <option value="CARTAO_CREDITO">Cartão de Crédito</option>
       </select>
     </div>
-    <button class="btn btn-success btn-block" style="margin-top:16px" onclick="confirmSale(${tot})">Confirmar Venda</button>
+    <button class="btn btn-success btn-block" style="margin-top:16px" onclick="confirmSale(${total})">Confirmar Venda</button>
   `;
   document.getElementById('modal').classList.add('show');
 }
 
-function closeModal() { document.getElementById('modal').classList.remove('show'); }
+function confirmSale(total) {
+  const method = document.getElementById('payMethod').value;
 
-async function confirmSale(tot) {
-  const pay = document.getElementById('payMethod').value;
-  const num = (db.sales.length + 1).toString().padStart(4, '0');
-  
-  cart.forEach(c => {
-    const p = db.products.find(x => x.id === c.id);
-    if (p) p.qty -= c.qty;
+  cart.forEach(item => {
+    const p = db.products.find(x => x.id === item.id);
+    if (p) p.qty -= item.qty;
   });
 
-  const saleData = {
+  const sale = {
     id: uid(),
-    number: num,
+    num: db.sales.length + 1,
     date: now(),
     items: [...cart],
-    total: tot,
-    payment: pay,
+    total: total,
+    method: method,
     user: currentUser.name,
     cancelled: false
   };
 
-  db.sales.unshift(saleData);
+  db.sales.unshift(sale);
+  log('VENDA', `Venda #${sale.num} realizada - Total: ${money(total)}`);
   
-  // Registra movimentação de caixa
-  db.movements.unshift({
-    id: uid(),
-    date: now(),
-    type: 'ENTRADA',
-    desc: `Venda #${num} (${pay})`,
-    val: tot,
-    user: currentUser.name
-  });
-
-  log('VENDA', `Venda #${num} no valor de ${money(tot)}`);
-  save();
-
-  if (supabaseClient) {
-    await supabaseClient.from('vendas').insert([saleData]);
-    await supabaseClient.from('produtos').upsert(db.products);
-  }
-
   cart = [];
   document.getElementById('discount').value = 0;
+  save();
   closeModal();
   renderAll();
   showToast('Venda realizada com sucesso!');
 }
 
-function renderSalesHistory() {
-  const q = document.getElementById('historySearch').value.toLowerCase();
-  const tbody = document.getElementById('salesHistory');
-  const items = db.sales.filter(s => s.number.includes(q) || s.payment.toLowerCase().includes(q));
-  tbody.innerHTML = items.map(s => `
-    <tr>
-      <td>#${s.number}</td>
-      <td>${new Date(s.date).toLocaleString('pt-BR')}</td>
-      <td>${(s.items || []).map(i => `${i.qty}x ${i.name}`).join(', ')}</td>
-      <td>${s.payment}</td>
-      <td><b>${money(s.total)}</b></td>
-      <td>${s.cancelled ? '<span class="badge b-danger">Cancelada</span>' : '<span class="badge b-ok">Concluída</span>'}</td>
-    </tr>
-  `).join('');
-}
-
 function renderStock() {
-  const q = document.getElementById('stockSearch').value.toLowerCase();
-  const tbody = document.getElementById('stockTable');
-  const items = db.products.filter(p => p.name.toLowerCase().includes(q));
-  tbody.innerHTML = items.map(p => `
+  const tb = document.getElementById('stockTable');
+  if (!tb) return;
+  tb.innerHTML = db.products.map(p => `
     <tr>
       <td>${p.emoji || '🍦'}</td>
       <td><b>${esc(p.name)}</b></td>
       <td>${esc(p.category)}</td>
       <td>${money(p.price)}</td>
       <td>${money(p.cost)}</td>
-      <td><span class="badge ${p.qty <= p.min ? 'b-danger' : 'b-ok'}">${p.qty} un.</span></td>
-      <td>${p.min} un.</td>
-      <td>
-        <button class="btn btn-secondary btn-small" onclick="openProductModal('${p.id}')"><i class="fa-solid fa-pen"></i></button>
-        <button class="btn btn-danger btn-small" onclick="deleteProduct('${p.id}')"><i class="fa-solid fa-trash"></i></button>
-      </td>
+      <td><span class="badge ${p.qty <= p.min ? 'b-danger' : 'b-ok'}">${p.qty}</span></td>
+      <td>${p.min}</td>
+      <td><button class="btn btn-secondary btn-small" onclick="removeProduct('${p.id}')"><i class="fa-solid fa-trash"></i></button></td>
     </tr>
   `).join('');
 }
 
-function openProductModal(id = null) {
-  const p = db.products.find(x => x.id === id) || { name: '', category: 'Frutas', price: '', cost: '', qty: 0, min: 5, emoji: '🍦' };
-  document.getElementById('modalTitle').textContent = id ? 'Editar Produto' : 'Novo Produto';
-  document.getElementById('modalBody').innerHTML = `
-    <div class="form-grid">
-      <div class="field"><label>EMOJI</label><input id="pEmoji" class="input" value="${p.emoji}"></div>
-      <div class="field"><label>NOME</label><input id="pName" class="input" value="${esc(p.name)}"></div>
-      <div class="field"><label>CATEGORIA</label><input id="pCat" class="input" value="${esc(p.category)}"></div>
-      <div class="field"><label>PREÇO DE VENDA</label><input id="pPrice" class="input" type="number" step=".01" value="${p.price}"></div>
-      <div class="field"><label>CUSTO</label><input id="pCost" class="input" type="number" step=".01" value="${p.cost}"></div>
-      <div class="field"><label>ESTOQUE ATUAL</label><input id="pQty" class="input" type="number" value="${p.qty}"></div>
-      <div class="field"><label>ESTOQUE MÍNIMO</label><input id="pMin" class="input" type="number" value="${p.min}"></div>
-    </div>
-    <button class="btn btn-primary btn-block" style="margin-top:16px" onclick="saveProduct('${id || ''}')">Salvar Produto</button>
-  `;
-  document.getElementById('modal').classList.add('show');
-}
-
-async function saveProduct(id) {
-  const name = document.getElementById('pName').value.trim();
-  if (!name) return showToast('Nome é obrigatório', true);
-
-  const prodData = {
-    id: id || uid(),
-    emoji: document.getElementById('pEmoji').value || '🍦',
-    name: name,
-    category: document.getElementById('pCat').value || 'Geral',
-    price: Number(document.getElementById('pPrice').value) || 0,
-    cost: Number(document.getElementById('pCost').value) || 0,
-    qty: Number(document.getElementById('pQty').value) || 0,
-    min: Number(document.getElementById('pMin').value) || 0
-  };
-
-  if (id) {
-    const idx = db.products.findIndex(x => x.id === id);
-    db.products[idx] = prodData;
-  } else {
-    db.products.push(prodData);
-  }
-
+function removeProduct(id) {
+  db.products = db.products.filter(p => p.id !== id);
   save();
-  if (supabaseClient) await supabaseClient.from('produtos').upsert([prodData]);
-  closeModal();
-  renderAll();
-  showToast('Produto salvo!');
-}
-
-async function deleteProduct(id) {
-  if (!confirm('Deseja excluir este produto?')) return;
-  db.products = db.products.filter(x => x.id !== id);
-  save();
-  if (supabaseClient) await supabaseClient.from('produtos').delete().eq('id', id);
   renderAll();
   showToast('Produto removido.');
 }
 
-function renderProduction() {
-  const sel = document.getElementById('prodProduct');
-  sel.innerHTML = db.products.map(p => `<option value="${p.id}">${p.emoji} ${p.name}</option>`).join('');
+function openProductModal() {
+  document.getElementById('modalTitle').textContent = 'Novo Produto';
+  document.getElementById('modalBody').innerHTML = `
+    <div class="form-grid">
+      <div class="field"><label>NOME</label><input id="pName" class="input"></div>
+      <div class="field"><label>CATEGORIA</label><input id="pCat" class="input" value="Frutas"></div>
+      <div class="field"><label>PREÇO (R$)</label><input id="pPrice" class="input" type="number" step=".01"></div>
+      <div class="field"><label>CUSTO (R$)</label><input id="pCost" class="input" type="number" step=".01"></div>
+      <div class="field"><label>QTD. INICIAL</label><input id="pQty" class="input" type="number" value="10"></div>
+      <div class="field"><label>MÍNIMO</label><input id="pMin" class="input" type="number" value="5"></div>
+    </div>
+    <button class="btn btn-primary btn-block" style="margin-top:16px" onclick="saveNewProduct()">Salvar Produto</button>
+  `;
+  document.getElementById('modal').classList.add('show');
 }
 
-async function registerProduction() {
+function saveNewProduct() {
+  const name = document.getElementById('pName').value.trim();
+  const price = Number(document.getElementById('pPrice').value) || 0;
+  if (!name || price <= 0) return showToast('Preencha os campos obrigatórios!', true);
+
+  db.products.push({
+    id: uid(),
+    name,
+    category: document.getElementById('pCat').value || 'Geral',
+    price,
+    cost: Number(document.getElementById('pCost').value) || 0,
+    qty: Number(document.getElementById('pQty').value) || 0,
+    min: Number(document.getElementById('pMin').value) || 5,
+    emoji: '🍦'
+  });
+
+  save();
+  closeModal();
+  renderAll();
+  showToast('Produto cadastrado!');
+}
+
+function renderProduction() {
+  const sel = document.getElementById('prodProduct');
+  if (!sel) return;
+  sel.innerHTML = db.products.map(p => `<option value="${p.id}">${esc(p.name)}</option>`).join('');
+}
+
+function registerProduction() {
   const pid = document.getElementById('prodProduct').value;
   const qty = Number(document.getElementById('prodQty').value) || 0;
-  const p = db.products.find(x => x.id === pid);
-  
-  if (p && qty > 0) {
-    p.qty += qty;
-    log('PRODUÇÃO', `Adicionado ${qty} un. ao produto ${p.name}`);
-    save();
-    if (supabaseClient) await supabaseClient.from('produtos').upsert([p]);
-    renderAll();
-    showToast('Produção registrada com sucesso!');
-  }
+  const prod = db.products.find(p => p.id === pid);
+
+  if (!prod || qty <= 0) return showToast('Dados de produção inválidos.', true);
+
+  prod.qty += qty;
+  db.productions.unshift({ id: uid(), date: now(), product: prod.name, qty });
+  log('PRODUÇÃO', `Adicionado ${qty} un ao estoque de ${prod.name}`);
+  save();
+  renderAll();
+  showToast('Produção registrada!');
 }
 
 function renderFinance() {
-  const tbody = document.getElementById('financeTable');
-  tbody.innerHTML = db.movements.map(m => `
+  const tb = document.getElementById('financeTable');
+  if (!tb) return;
+  tb.innerHTML = db.movements.map(m => `
     <tr>
       <td>${new Date(m.date).toLocaleString('pt-BR')}</td>
       <td><span class="badge ${m.type === 'ENTRADA' ? 'b-ok' : 'b-danger'}">${m.type}</span></td>
       <td>${esc(m.desc)}</td>
-      <td><b>${money(m.val)}</b></td>
+      <td>${money(m.val)}</td>
       <td>${esc(m.user)}</td>
     </tr>
   `).join('');
 }
 
 function renderAudit() {
-  const tbody = document.getElementById('auditTable');
-  tbody.innerHTML = db.audit.map(a => `
+  const tb = document.getElementById('auditTable');
+  if (!tb) return;
+  tb.innerHTML = db.audit.map(a => `
     <tr>
       <td>${new Date(a.at).toLocaleString('pt-BR')}</td>
       <td>${esc(a.user)}</td>
@@ -598,12 +687,29 @@ function renderAudit() {
 }
 
 function renderUsers() {
-  const tbody = document.getElementById('usersTable');
-  tbody.innerHTML = db.users.map(u => `
+  const tb = document.getElementById('usersTable');
+  if (!tb) return;
+  tb.innerHTML = db.users.map(u => `
     <tr>
       <td>${esc(u.name)}</td>
       <td>${esc(u.email)}</td>
       <td><span class="badge b-info">${esc(u.role)}</span></td>
+    </tr>
+  `).join('');
+}
+
+function renderSalesHistory() {
+  const tb = document.getElementById('salesHistory');
+  if (!tb) return;
+  tb.innerHTML = db.sales.map(s => `
+    <tr>
+      <td>#${s.num}</td>
+      <td>${new Date(s.date).toLocaleString('pt-BR')}</td>
+      <td>${s.items.length} itens</td>
+      <td><span class="badge b-info">${s.method}</span></td>
+      <td><b>${money(s.total)}</b></td>
+      <td><span class="badge ${s.cancelled ? 'b-danger' : 'b-ok'}">${s.cancelled ? 'Cancelada' : 'Concluída'}</span></td>
+      <td>-</td>
     </tr>
   `).join('');
 }
@@ -621,7 +727,14 @@ function saveSupabase() {
   const key = document.getElementById('sbKey').value.trim();
   localStorage.setItem('sb_url', url);
   localStorage.setItem('sb_key', key);
-  location.reload();
+  SUPABASE_URL = url;
+  SUPABASE_KEY = key;
+  try {
+    supabaseClient = supabase.createClient(url, key);
+    showToast('Reconectado ao Supabase!');
+  } catch (e) {
+    showToast('Erro ao conectar ao Supabase.', true);
+  }
 }
 </script>
 </body>
